@@ -1,5 +1,5 @@
-use ethers::types::Address;
 use crate::utils::addr;
+use ethers::types::Address;
 
 /// The networks where the Dark Forest contracts are deployed at
 pub enum Network {
