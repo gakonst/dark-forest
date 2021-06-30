@@ -12,6 +12,8 @@ pub use info::*;
 mod default;
 pub use default::DEFAULTS;
 
+mod conversion;
+
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(u8)]
 /// The planet's type, depending on which the planet has additional functionalities
