@@ -1,0 +1,675 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "bytes",
+        "name": "_b",
+        "type": "bytes"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_startByte",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_endByte",
+        "type": "uint256"
+      }
+    ],
+    "name": "_calculateByteUInt",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "_byteUInt",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "enum DarkForestTypes.SpaceType",
+        "name": "spaceType",
+        "type": "DarkForestTypes.SpaceType"
+      },
+      {
+        "internalType": "uint256",
+        "name": "biomebase",
+        "type": "uint256"
+      }
+    ],
+    "name": "_getBiome",
+    "outputs": [
+      {
+        "internalType": "enum DarkForestTypes.Biome",
+        "name": "",
+        "type": "DarkForestTypes.Biome"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_location",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_perlin",
+        "type": "uint256"
+      }
+    ],
+    "name": "_getPlanetLevelTypeAndSpaceType",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "enum DarkForestTypes.PlanetType",
+        "name": "",
+        "type": "DarkForestTypes.PlanetType"
+      },
+      {
+        "internalType": "enum DarkForestTypes.SpaceType",
+        "name": "",
+        "type": "DarkForestTypes.SpaceType"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "_getRadius",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "bool",
+            "name": "isInitialized",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "planetDiscoveredOn",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum DarkForestTypes.ArtifactRarity",
+            "name": "rarity",
+            "type": "DarkForestTypes.ArtifactRarity"
+          },
+          {
+            "internalType": "enum DarkForestTypes.Biome",
+            "name": "planetBiome",
+            "type": "DarkForestTypes.Biome"
+          },
+          {
+            "internalType": "uint256",
+            "name": "mintedAtTimestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "discoverer",
+            "type": "address"
+          },
+          {
+            "internalType": "enum DarkForestTypes.ArtifactType",
+            "name": "artifactType",
+            "type": "DarkForestTypes.ArtifactType"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastActivated",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastDeactivated",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "wormholeTo",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.Artifact",
+        "name": "artifact",
+        "type": "tuple"
+      }
+    ],
+    "name": "_getUpgradeForArtifact",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "popCapMultiplier",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "popGroMultiplier",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "rangeMultiplier",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "speedMultiplier",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "defMultiplier",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.Upgrade",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_loc",
+        "type": "uint256"
+      }
+    ],
+    "name": "_locationIdValid",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "planetLevel",
+        "type": "uint256"
+      }
+    ],
+    "name": "artifactRarityFromPlanetLevel",
+    "outputs": [
+      {
+        "internalType": "enum DarkForestTypes.ArtifactRarity",
+        "name": "",
+        "type": "DarkForestTypes.ArtifactRarity"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "locationId",
+        "type": "uint256"
+      }
+    ],
+    "name": "checkPlanetDOS",
+    "outputs": [],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "defaultUpgrade",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "popCapMultiplier",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "popGroMultiplier",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "rangeMultiplier",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "speedMultiplier",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "defMultiplier",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.Upgrade",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "locationId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getActiveArtifact",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "bool",
+            "name": "isInitialized",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "planetDiscoveredOn",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum DarkForestTypes.ArtifactRarity",
+            "name": "rarity",
+            "type": "DarkForestTypes.ArtifactRarity"
+          },
+          {
+            "internalType": "enum DarkForestTypes.Biome",
+            "name": "planetBiome",
+            "type": "DarkForestTypes.Biome"
+          },
+          {
+            "internalType": "uint256",
+            "name": "mintedAtTimestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "discoverer",
+            "type": "address"
+          },
+          {
+            "internalType": "enum DarkForestTypes.ArtifactType",
+            "name": "artifactType",
+            "type": "DarkForestTypes.ArtifactType"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastActivated",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastDeactivated",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "wormholeTo",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.Artifact",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "locationId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "artifactId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getPlanetArtifact",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "bool",
+            "name": "isInitialized",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "planetDiscoveredOn",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum DarkForestTypes.ArtifactRarity",
+            "name": "rarity",
+            "type": "DarkForestTypes.ArtifactRarity"
+          },
+          {
+            "internalType": "enum DarkForestTypes.Biome",
+            "name": "planetBiome",
+            "type": "DarkForestTypes.Biome"
+          },
+          {
+            "internalType": "uint256",
+            "name": "mintedAtTimestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "discoverer",
+            "type": "address"
+          },
+          {
+            "internalType": "enum DarkForestTypes.ArtifactType",
+            "name": "artifactType",
+            "type": "DarkForestTypes.ArtifactType"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastActivated",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastDeactivated",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "wormholeTo",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.Artifact",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "bool",
+            "name": "isInitialized",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "planetDiscoveredOn",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum DarkForestTypes.ArtifactRarity",
+            "name": "rarity",
+            "type": "DarkForestTypes.ArtifactRarity"
+          },
+          {
+            "internalType": "enum DarkForestTypes.Biome",
+            "name": "planetBiome",
+            "type": "DarkForestTypes.Biome"
+          },
+          {
+            "internalType": "uint256",
+            "name": "mintedAtTimestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "discoverer",
+            "type": "address"
+          },
+          {
+            "internalType": "enum DarkForestTypes.ArtifactType",
+            "name": "artifactType",
+            "type": "DarkForestTypes.ArtifactType"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastActivated",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastDeactivated",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "wormholeTo",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.Artifact",
+        "name": "artifact",
+        "type": "tuple"
+      }
+    ],
+    "name": "isActivated",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256[5]",
+        "name": "perlinFlags",
+        "type": "uint256[5]"
+      },
+      {
+        "internalType": "bool",
+        "name": "checkingBiome",
+        "type": "bool"
+      }
+    ],
+    "name": "revertIfBadSnarkPerlinFlags",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "perlin",
+        "type": "uint256"
+      }
+    ],
+    "name": "spaceTypeFromPerlin",
+    "outputs": [
+      {
+        "internalType": "enum DarkForestTypes.SpaceType",
+        "name": "",
+        "type": "DarkForestTypes.SpaceType"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "bool",
+            "name": "isInitialized",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "planetDiscoveredOn",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum DarkForestTypes.ArtifactRarity",
+            "name": "rarity",
+            "type": "DarkForestTypes.ArtifactRarity"
+          },
+          {
+            "internalType": "enum DarkForestTypes.Biome",
+            "name": "planetBiome",
+            "type": "DarkForestTypes.Biome"
+          },
+          {
+            "internalType": "uint256",
+            "name": "mintedAtTimestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "discoverer",
+            "type": "address"
+          },
+          {
+            "internalType": "enum DarkForestTypes.ArtifactType",
+            "name": "artifactType",
+            "type": "DarkForestTypes.ArtifactType"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastActivated",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastDeactivated",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "wormholeTo",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.Artifact",
+        "name": "artifact",
+        "type": "tuple"
+      }
+    ],
+    "name": "timeDelayUpgrade",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "popCapMultiplier",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "popGroMultiplier",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "rangeMultiplier",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "speedMultiplier",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "defMultiplier",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.Upgrade",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  }
+]

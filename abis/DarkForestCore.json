@@ -1,0 +1,2329 @@
+[
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "player",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "arrivalId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "from",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "to",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "artifactId",
+        "type": "uint256"
+      }
+    ],
+    "name": "ArrivalQueued",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "player",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "artifactId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "loc",
+        "type": "uint256"
+      }
+    ],
+    "name": "ArtifactActivated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "player",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "artifactId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "loc",
+        "type": "uint256"
+      }
+    ],
+    "name": "ArtifactDeactivated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "player",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "artifactId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "loc",
+        "type": "uint256"
+      }
+    ],
+    "name": "ArtifactDeposited",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "player",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "artifactId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "loc",
+        "type": "uint256"
+      }
+    ],
+    "name": "ArtifactFound",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "player",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "artifactId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "loc",
+        "type": "uint256"
+      }
+    ],
+    "name": "ArtifactWithdrawn",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "revealer",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "loc",
+        "type": "uint256"
+      }
+    ],
+    "name": "LocationRevealed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "player",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "loc",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "tohatLevel",
+        "type": "uint256"
+      }
+    ],
+    "name": "PlanetHatBought",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "player",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "loc",
+        "type": "uint256"
+      }
+    ],
+    "name": "PlanetProspected",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "player",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "loc",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "PlanetSilverWithdrawn",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "loc",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "receiver",
+        "type": "address"
+      }
+    ],
+    "name": "PlanetTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "player",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "loc",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "branch",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "toBranchLevel",
+        "type": "uint256"
+      }
+    ],
+    "name": "PlanetUpgraded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "player",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "loc",
+        "type": "uint256"
+      }
+    ],
+    "name": "PlayerInitialized",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "ADMIN_CAN_ADD_PLANETS",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "TARGET4_RADIUS",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "TOKEN_MINT_END_TIMESTAMP",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "WORLD_RADIUS_LOCKED",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "locationId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "artifactId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "wormholeTo",
+        "type": "uint256"
+      }
+    ],
+    "name": "activateArtifact",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "adminAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_newRadius",
+        "type": "uint256"
+      }
+    ],
+    "name": "adminSetWorldRadius",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "key",
+        "type": "uint256"
+      }
+    ],
+    "name": "artifactIdToPlanetId",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "key",
+        "type": "uint256"
+      }
+    ],
+    "name": "artifactIdToVoyageId",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_location",
+        "type": "uint256"
+      }
+    ],
+    "name": "buyHat",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_newAdmin",
+        "type": "address"
+      }
+    ],
+    "name": "changeAdmin",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "newCooldown",
+        "type": "uint256"
+      }
+    ],
+    "name": "changeLocationRevealCooldown",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_newConstant",
+        "type": "uint256"
+      }
+    ],
+    "name": "changeTarget4RadiusConstant",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256[2]",
+        "name": "_a",
+        "type": "uint256[2]"
+      },
+      {
+        "internalType": "uint256[2][2]",
+        "name": "_b",
+        "type": "uint256[2][2]"
+      },
+      {
+        "internalType": "uint256[2]",
+        "name": "_c",
+        "type": "uint256[2]"
+      },
+      {
+        "internalType": "uint256[9]",
+        "name": "_input",
+        "type": "uint256[9]"
+      }
+    ],
+    "name": "checkRevealProof",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "location",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "perlin",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "level",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum DarkForestTypes.PlanetType",
+            "name": "planetType",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bool",
+            "name": "requireValidLocationId",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.AdminCreatePlanetArgs",
+        "name": "args",
+        "type": "tuple"
+      }
+    ],
+    "name": "createPlanet",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "locationId",
+        "type": "uint256"
+      }
+    ],
+    "name": "deactivateArtifact",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "locationId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "artifactId",
+        "type": "uint256"
+      }
+    ],
+    "name": "depositArtifact",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256[2]",
+        "name": "_a",
+        "type": "uint256[2]"
+      },
+      {
+        "internalType": "uint256[2][2]",
+        "name": "_b",
+        "type": "uint256[2][2]"
+      },
+      {
+        "internalType": "uint256[2]",
+        "name": "_c",
+        "type": "uint256[2]"
+      },
+      {
+        "internalType": "uint256[7]",
+        "name": "_input",
+        "type": "uint256[7]"
+      }
+    ],
+    "name": "findArtifact",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "gameConstants",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "MAX_NATURAL_PLANET_LEVEL",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "TIME_FACTOR_HUNDREDTHS",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "PERLIN_THRESHOLD_1",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "PERLIN_THRESHOLD_2",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "PERLIN_THRESHOLD_3",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "INIT_PERLIN_MIN",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "INIT_PERLIN_MAX",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "BIOME_THRESHOLD_1",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "BIOME_THRESHOLD_2",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "PLANET_RARITY",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "PHOTOID_ACTIVATION_DELAY",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "LOCATION_REVEAL_COOLDOWN",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint8[5][10][4]",
+            "name": "PLANET_TYPE_WEIGHTS",
+            "type": "uint8[5][10][4]"
+          },
+          {
+            "internalType": "uint256[6]",
+            "name": "ARTIFACT_POINT_VALUES",
+            "type": "uint256[6]"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.GameConstants",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getArtifactPointValues",
+    "outputs": [
+      {
+        "internalType": "uint256[6]",
+        "name": "",
+        "type": "uint256[6]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getCumulativeRarities",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getDefaultStats",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "string",
+            "name": "label",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "populationCap",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "populationGrowth",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "range",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "speed",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "defense",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "silverGrowth",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "silverCap",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "barbarianPercentage",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.PlanetDefaultStats[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getNPlanets",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getNPlayers",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getNRevealedPlanets",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "arrivalId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getPlanetArrival",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "player",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "fromPlanet",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "toPlanet",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "popArriving",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "silverMoved",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "departureTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "arrivalTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum DarkForestTypes.ArrivalType",
+            "name": "arrivalType",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "carriedArtifactId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "distance",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.ArrivalData",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "locationId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "idx",
+        "type": "uint256"
+      }
+    ],
+    "name": "getPlanetEvent",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum DarkForestTypes.PlanetEventType",
+            "name": "eventType",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timeTrigger",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timeAdded",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.PlanetEventMetadata",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "locationId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getPlanetEventsCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getPlanetLevelThresholds",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "location",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
+      }
+    ],
+    "name": "getRefreshedPlanet",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "range",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "speed",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "defense",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "population",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "populationCap",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "populationGrowth",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "silverCap",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "silverGrowth",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "silver",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "planetLevel",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum DarkForestTypes.PlanetType",
+            "name": "planetType",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bool",
+            "name": "isHomePlanet",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.Planet",
+        "name": "",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bool",
+            "name": "isInitialized",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "createdAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastUpdated",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "perlin",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum DarkForestTypes.SpaceType",
+            "name": "spaceType",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "upgradeState0",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "upgradeState1",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "upgradeState2",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "hatLevel",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "hasTriedFindingArtifact",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "prospectedBlockNumber",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "destroyed",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.PlanetExtendedInfo",
+        "name": "",
+        "type": "tuple"
+      },
+      {
+        "internalType": "uint256[12]",
+        "name": "eventsToRemove",
+        "type": "uint256[12]"
+      },
+      {
+        "internalType": "uint256[12]",
+        "name": "artifactsToAdd",
+        "type": "uint256[12]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "locationId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getRevealedCoords",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "locationId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "x",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "y",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "revealer",
+            "type": "address"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.RevealedCoords",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getTypeWeights",
+    "outputs": [
+      {
+        "internalType": "uint8[5][10][4]",
+        "name": "",
+        "type": "uint8[5][10][4]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getUpgrades",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "popCapMultiplier",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "popGroMultiplier",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "rangeMultiplier",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "speedMultiplier",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "defMultiplier",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.Upgrade[4][3]",
+        "name": "",
+        "type": "tuple[4][3]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256[2]",
+        "name": "_a",
+        "type": "uint256[2]"
+      },
+      {
+        "internalType": "uint256[2][2]",
+        "name": "_b",
+        "type": "uint256[2][2]"
+      },
+      {
+        "internalType": "uint256[2]",
+        "name": "_c",
+        "type": "uint256[2]"
+      },
+      {
+        "internalType": "uint256[8]",
+        "name": "_input",
+        "type": "uint256[8]"
+      }
+    ],
+    "name": "initializePlayer",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256[2]",
+        "name": "_a",
+        "type": "uint256[2]"
+      },
+      {
+        "internalType": "uint256[2][2]",
+        "name": "_b",
+        "type": "uint256[2][2]"
+      },
+      {
+        "internalType": "uint256[2]",
+        "name": "_c",
+        "type": "uint256[2]"
+      },
+      {
+        "internalType": "uint256[13]",
+        "name": "_input",
+        "type": "uint256[13]"
+      }
+    ],
+    "name": "move",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "pause",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "paused",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "key",
+        "type": "uint256"
+      }
+    ],
+    "name": "planetArrivals",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "player",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "fromPlanet",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "toPlanet",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "popArriving",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "silverMoved",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "departureTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "arrivalTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum DarkForestTypes.ArrivalType",
+            "name": "arrivalType",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "carriedArtifactId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "distance",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.ArrivalData",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "key",
+        "type": "uint256"
+      }
+    ],
+    "name": "planetArtifacts",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "level",
+        "type": "uint256"
+      }
+    ],
+    "name": "planetDefaultStats",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "string",
+            "name": "label",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "populationCap",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "populationGrowth",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "range",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "speed",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "defense",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "silverGrowth",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "silverCap",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "barbarianPercentage",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.PlanetDefaultStats",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "key",
+        "type": "uint256"
+      }
+    ],
+    "name": "planetEvents",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum DarkForestTypes.PlanetEventType",
+            "name": "eventType",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timeTrigger",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timeAdded",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.PlanetEventMetadata[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "planetEventsCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "idx",
+        "type": "uint256"
+      }
+    ],
+    "name": "planetIds",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "planetLevelsCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "key",
+        "type": "uint256"
+      }
+    ],
+    "name": "planets",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "range",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "speed",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "defense",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "population",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "populationCap",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "populationGrowth",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "silverCap",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "silverGrowth",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "silver",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "planetLevel",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum DarkForestTypes.PlanetType",
+            "name": "planetType",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bool",
+            "name": "isHomePlanet",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.Planet",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "key",
+        "type": "uint256"
+      }
+    ],
+    "name": "planetsExtendedInfo",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "bool",
+            "name": "isInitialized",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "createdAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastUpdated",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "perlin",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum DarkForestTypes.SpaceType",
+            "name": "spaceType",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "upgradeState0",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "upgradeState1",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "upgradeState2",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "hatLevel",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "hasTriedFindingArtifact",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "prospectedBlockNumber",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "destroyed",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.PlanetExtendedInfo",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "idx",
+        "type": "uint256"
+      }
+    ],
+    "name": "playerIds",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "key",
+        "type": "address"
+      }
+    ],
+    "name": "players",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "bool",
+            "name": "isInitialized",
+            "type": "bool"
+          },
+          {
+            "internalType": "address",
+            "name": "player",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "initTimestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "homePlanetId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastRevealTimestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "withdrawnSilver",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalArtifactPoints",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.Player",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "locationId",
+        "type": "uint256"
+      }
+    ],
+    "name": "prospectPlanet",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "location",
+        "type": "uint256"
+      }
+    ],
+    "name": "refreshPlanet",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256[2]",
+        "name": "_a",
+        "type": "uint256[2]"
+      },
+      {
+        "internalType": "uint256[2][2]",
+        "name": "_b",
+        "type": "uint256[2][2]"
+      },
+      {
+        "internalType": "uint256[2]",
+        "name": "_c",
+        "type": "uint256[2]"
+      },
+      {
+        "internalType": "uint256[9]",
+        "name": "_input",
+        "type": "uint256[9]"
+      }
+    ],
+    "name": "revealLocation",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "key",
+        "type": "uint256"
+      }
+    ],
+    "name": "revealedCoords",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "locationId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "x",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "y",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "revealer",
+            "type": "address"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.RevealedCoords",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "idx",
+        "type": "uint256"
+      }
+    ],
+    "name": "revealedPlanetIds",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "s",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "adminAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "contract Whitelist",
+        "name": "whitelist",
+        "type": "address"
+      },
+      {
+        "internalType": "contract DarkForestTokens",
+        "name": "tokens",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "paused",
+        "type": "bool"
+      },
+      {
+        "internalType": "bool",
+        "name": "ADMIN_CAN_ADD_PLANETS",
+        "type": "bool"
+      },
+      {
+        "internalType": "bool",
+        "name": "WORLD_RADIUS_LOCKED",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "TOKEN_MINT_END_TIMESTAMP",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "TARGET4_RADIUS",
+        "type": "uint256"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bool",
+            "name": "DISABLE_ZK_CHECKS",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "PLANETHASH_KEY",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "SPACETYPE_KEY",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "BIOMEBASE_KEY",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "PERLIN_MIRROR_X",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "PERLIN_MIRROR_Y",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "PERLIN_LENGTH_SCALE",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.SnarkConstants",
+        "name": "snarkConstants",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "MAX_NATURAL_PLANET_LEVEL",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "TIME_FACTOR_HUNDREDTHS",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "PERLIN_THRESHOLD_1",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "PERLIN_THRESHOLD_2",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "PERLIN_THRESHOLD_3",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "INIT_PERLIN_MIN",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "INIT_PERLIN_MAX",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "BIOME_THRESHOLD_1",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "BIOME_THRESHOLD_2",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "PLANET_RARITY",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "PHOTOID_ACTIVATION_DELAY",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "LOCATION_REVEAL_COOLDOWN",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint8[5][10][4]",
+            "name": "PLANET_TYPE_WEIGHTS",
+            "type": "uint8[5][10][4]"
+          },
+          {
+            "internalType": "uint256[6]",
+            "name": "ARTIFACT_POINT_VALUES",
+            "type": "uint256[6]"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.GameConstants",
+        "name": "gameConstants",
+        "type": "tuple"
+      },
+      {
+        "internalType": "uint256",
+        "name": "planetLevelsCount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "worldRadius",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "planetEventsCount",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "newTokenMintEndTime",
+        "type": "uint256"
+      }
+    ],
+    "name": "setTokenMintEndTime",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "snarkConstants",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "bool",
+            "name": "DISABLE_ZK_CHECKS",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "PLANETHASH_KEY",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "SPACETYPE_KEY",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "BIOMEBASE_KEY",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "PERLIN_MIRROR_X",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "PERLIN_MIRROR_Y",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "PERLIN_LENGTH_SCALE",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.SnarkConstants",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_location",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_player",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "unpause",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_location",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_branch",
+        "type": "uint256"
+      }
+    ],
+    "name": "upgradePlanet",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "withdraw",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "locationId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "artifactId",
+        "type": "uint256"
+      }
+    ],
+    "name": "withdrawArtifact",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "locationId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "withdrawSilver",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "worldRadius",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]

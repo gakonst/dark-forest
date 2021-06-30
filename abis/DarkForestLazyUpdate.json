@@ -1,0 +1,623 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "currentTimestamp",
+        "type": "uint256"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "range",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "speed",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "defense",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "population",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "populationCap",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "populationGrowth",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "silverCap",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "silverGrowth",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "silver",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "planetLevel",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum DarkForestTypes.PlanetType",
+            "name": "planetType",
+            "type": "DarkForestTypes.PlanetType"
+          },
+          {
+            "internalType": "bool",
+            "name": "isHomePlanet",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.Planet",
+        "name": "planet",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bool",
+            "name": "isInitialized",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "createdAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastUpdated",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "perlin",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum DarkForestTypes.SpaceType",
+            "name": "spaceType",
+            "type": "DarkForestTypes.SpaceType"
+          },
+          {
+            "internalType": "uint256",
+            "name": "upgradeState0",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "upgradeState1",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "upgradeState2",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "hatLevel",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "hasTriedFindingArtifact",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "prospectedBlockNumber",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "destroyed",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.PlanetExtendedInfo",
+        "name": "planetExtendedInfo",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum DarkForestTypes.PlanetEventType",
+            "name": "eventType",
+            "type": "DarkForestTypes.PlanetEventType"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timeTrigger",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timeAdded",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.PlanetEventMetadata[]",
+        "name": "events",
+        "type": "tuple[]"
+      }
+    ],
+    "name": "applyPendingEvents",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "range",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "speed",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "defense",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "population",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "populationCap",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "populationGrowth",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "silverCap",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "silverGrowth",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "silver",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "planetLevel",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum DarkForestTypes.PlanetType",
+            "name": "planetType",
+            "type": "DarkForestTypes.PlanetType"
+          },
+          {
+            "internalType": "bool",
+            "name": "isHomePlanet",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.Planet",
+        "name": "",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bool",
+            "name": "isInitialized",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "createdAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastUpdated",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "perlin",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum DarkForestTypes.SpaceType",
+            "name": "spaceType",
+            "type": "DarkForestTypes.SpaceType"
+          },
+          {
+            "internalType": "uint256",
+            "name": "upgradeState0",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "upgradeState1",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "upgradeState2",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "hatLevel",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "hasTriedFindingArtifact",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "prospectedBlockNumber",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "destroyed",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.PlanetExtendedInfo",
+        "name": "",
+        "type": "tuple"
+      },
+      {
+        "internalType": "uint256[12]",
+        "name": "",
+        "type": "uint256[12]"
+      },
+      {
+        "internalType": "uint256[12]",
+        "name": "",
+        "type": "uint256[12]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "updateToTime",
+        "type": "uint256"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "range",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "speed",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "defense",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "population",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "populationCap",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "populationGrowth",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "silverCap",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "silverGrowth",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "silver",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "planetLevel",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum DarkForestTypes.PlanetType",
+            "name": "planetType",
+            "type": "DarkForestTypes.PlanetType"
+          },
+          {
+            "internalType": "bool",
+            "name": "isHomePlanet",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.Planet",
+        "name": "planet",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bool",
+            "name": "isInitialized",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "createdAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastUpdated",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "perlin",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum DarkForestTypes.SpaceType",
+            "name": "spaceType",
+            "type": "DarkForestTypes.SpaceType"
+          },
+          {
+            "internalType": "uint256",
+            "name": "upgradeState0",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "upgradeState1",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "upgradeState2",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "hatLevel",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "hasTriedFindingArtifact",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "prospectedBlockNumber",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "destroyed",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.PlanetExtendedInfo",
+        "name": "planetExtendedInfo",
+        "type": "tuple"
+      }
+    ],
+    "name": "updatePlanet",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "range",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "speed",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "defense",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "population",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "populationCap",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "populationGrowth",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "silverCap",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "silverGrowth",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "silver",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "planetLevel",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum DarkForestTypes.PlanetType",
+            "name": "planetType",
+            "type": "DarkForestTypes.PlanetType"
+          },
+          {
+            "internalType": "bool",
+            "name": "isHomePlanet",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.Planet",
+        "name": "",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bool",
+            "name": "isInitialized",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "createdAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lastUpdated",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "perlin",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum DarkForestTypes.SpaceType",
+            "name": "spaceType",
+            "type": "DarkForestTypes.SpaceType"
+          },
+          {
+            "internalType": "uint256",
+            "name": "upgradeState0",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "upgradeState1",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "upgradeState2",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "hatLevel",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "hasTriedFindingArtifact",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "prospectedBlockNumber",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "destroyed",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.PlanetExtendedInfo",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  }
+]
