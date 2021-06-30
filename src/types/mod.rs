@@ -2,6 +2,8 @@ use derive_more::AsRef;
 use ethers::types::U256;
 use serde::{de, Deserialize, Serialize};
 
+pub mod planet;
+
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, AsRef)]
 #[as_ref]
 /// Wrapper type around the planet id, created by the MIMC hash of the coords
@@ -36,6 +38,7 @@ pub struct PlanetLocation {
     pub biomebase: u64,
 }
 
+// helper for deserializing hex strings not prefixed with 0x as the PlanetId
 fn deserialize_planet_id<'de, D>(deserializer: D) -> Result<PlanetId, D::Error>
 where
     D: de::Deserializer<'de>,
