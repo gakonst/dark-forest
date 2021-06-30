@@ -50,3 +50,22 @@ where
     let s: &str = de::Deserialize::deserialize(deserializer)?;
     s.parse().map_err(de::Error::custom).map(PlanetId)
 }
+
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+/// Bonuses related to the planet's id
+pub struct Bonus {
+    pub energy_cap: u64,
+    pub energy_growth: u64,
+    pub range: u64,
+    pub speed: u64,
+    pub defense: u64,
+}
+
+impl From<PlanetId> for Bonus {
+    fn from(_src: PlanetId) -> Self {
+        // depending on which bytes are set on the U256 bytes array
+        // done in the `hexgen` package
+        todo!()
+    }
+}

@@ -1,8 +1,41 @@
 //! Business logic for calculating a planet's type, level as well as its space type
 //! from its coordinates
-use super::{PlanetId, PlanetLevel, PlanetLocation, PlanetType, SpaceType};
+use super::{
+    Bonus, PlanetId, PlanetInfo, PlanetLevel, PlanetLocation, PlanetType, SpaceType, DEFAULTS,
+};
 use crate::constants;
 use ethers::types::U256;
+
+// TODO: Finish this implementation
+impl From<&PlanetLocation> for PlanetInfo {
+    /// Creates a "default" PlanetInfo object to load planets "lazily" when they
+    /// have not been instantiated on-chain, given a planet's location
+    fn from(loc: &PlanetLocation) -> Self {
+        let level = PlanetLevel::from(loc).as_ref().as_usize();
+        let planet_type = PlanetType::from(loc);
+        let space_type = SpaceType::from(loc);
+        let bonus = Bonus::from(loc.hash);
+
+        let defaults = &DEFAULTS[level];
+        let mut planet = Self::default();
+
+        // initialize the planet's stats along with any bonuses that go with it
+        planet.planet.population_cap = defaults.population_cap * bonus.energy_cap;
+        planet.planet.population_growth = defaults.population_growth * bonus.energy_growth;
+        planet.planet.range = defaults.range * bonus.range;
+        planet.planet.speed = defaults.speed * bonus.speed;
+        planet.planet.defense = defaults.defense * bonus.defense;
+        planet.planet.silver_cap = defaults.silver_cap;
+
+        if planet_type == PlanetType::SilverMine {
+            planet.planet.silver_growth = defaults.silver_growth;
+        }
+
+        todo!("https://github.com/darkforest-eth/client/blob/0505b315362b9e87b3c021cdac6515ae3d5bcf09/src/Backend/GameLogic/GameObjects.ts#L1295");
+
+        planet
+    }
+}
 
 // https://github.com/darkforest-eth/client/blob/050b3e3545f28f559f89a95d41e6b31f916d043a/src/Backend/GameLogic/GameObjects.ts#L1197
 impl From<&PlanetLocation> for PlanetLevel {
@@ -100,10 +133,32 @@ impl SpaceType {
     }
 }
 
-// convenience method
 impl From<&PlanetLocation> for SpaceType {
     /// The SpaceType is calculated from the planet's perlin noise value
     fn from(loc: &PlanetLocation) -> Self {
         SpaceType::from_perlin(loc.perlin)
+    }
+}
+
+// Helper functions short-hand for accessing the above From<T> implementations
+impl PlanetLocation {
+    /// Gets the planet's level
+    pub fn level(&self) -> PlanetLevel {
+        self.into()
+    }
+
+    /// Gets the planet's type
+    pub fn planet_type(&self) -> PlanetType {
+        self.into()
+    }
+
+    /// Gets the planet's space type
+    pub fn space_type(&self) -> SpaceType {
+        self.into()
+    }
+
+    /// Gets the planet's bonuses
+    pub fn bonuses(&self) -> Bonus {
+        self.hash.into()
     }
 }
