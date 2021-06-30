@@ -1,6 +1,17 @@
-# Dark Forest
+# <h1 align="center"> dark-forest.rs </h1>
 
-*Terminal UI implementation of the Dark Forest game*
+*Terminal UI implementation and types for the Dark Forest game*
+
+## Development
+
+We use the standard Rust toolchain
+
+```
+cargo check
+cargo test
+cargo doc --open
+cargo run
+```
 
 ## Roadmap
 
@@ -21,3 +32,4 @@
 * [x] Type safe bindings to the smart contracts
 * [ ] Fast Explorer
 * [ ] Fast SNARKer for moves
+* [ ] Refactor to smaller packages which can be imported for 3rd party integrations

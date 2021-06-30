@@ -1,3 +1,4 @@
+#![allow(unused)]
 use ethers::contract::Abigen;
 
 // const OUR_CONTRACTS: &[&'static str] = &[
