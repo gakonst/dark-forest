@@ -19,12 +19,18 @@ cargo run
     * [x] Map: Can read the map from the plugin
     * [ ] Planets
         * [x] Planet Info
-        * [x] 
 * [ ] Actions
     * [ ] Planets
         * [ ] Moving
         * [ ] Upgrading
+        * [ ] Refresh a Planet
     * [ ] Artifacts
+        * [ ] Prospect
+        * [ ] Find
+        * [ ] Deposit
+        * [ ] Withdraw
+        * [ ] Activate
+        * [ ] Deactive
     * [ ] Silver
 * [ ] TUI / CLI / Repl for interacting with the system
 * [ ] Caching responses
