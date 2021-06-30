@@ -73,3 +73,86 @@ pub struct RevealedCoords {
     pub y: U256,
     pub revealer: Address,
 }
+
+// helper types to convert from the ethers-rs types to a type we can work with more
+// easily. ideally, ethers should do this for us.
+
+type RawPlanet = (
+    Address,
+    U256,
+    U256,
+    U256,
+    U256,
+    U256,
+    U256,
+    U256,
+    U256,
+    U256,
+    U256,
+    u8,
+    bool,
+);
+impl From<RawPlanet> for Planet {
+    fn from(planet: RawPlanet) -> Self {
+        Planet {
+            owner: planet.0,
+            range: planet.1,
+            speed: planet.2,
+            defense: planet.3,
+            population: planet.4,
+            population_cap: planet.5,
+            population_growth: planet.6,
+            silver_cap: planet.7,
+            silver_growth: planet.8,
+            silver: planet.9,
+            planet_level: PlanetLevel(planet.10),
+            planet_type: planet.11.into(),
+            is_home: planet.12,
+        }
+    }
+}
+
+type RawPlanetExtendedInfo = (
+    bool,
+    U256,
+    U256,
+    U256,
+    u8,
+    U256,
+    U256,
+    U256,
+    U256,
+    bool,
+    U256,
+    bool,
+);
+impl From<RawPlanetExtendedInfo> for PlanetExtendedInfo {
+    fn from(planet: RawPlanetExtendedInfo) -> Self {
+        PlanetExtendedInfo {
+            initialized: planet.0,
+            created_at: planet.1,
+            last_updated: planet.2,
+            perlin: planet.3,
+            space_type: planet.4.into(),
+            upgrade_state_0: planet.5,
+            upgrade_state_1: planet.6,
+            upgrade_state_2: planet.7,
+            hat_level: planet.8,
+            has_tried_finding_artifact: planet.9,
+            prospected_block_number: planet.10,
+            destroyed: planet.11,
+        }
+    }
+}
+
+type RawRevealedCoords = (U256, U256, U256, Address);
+impl From<RawRevealedCoords> for RevealedCoords {
+    fn from(coords: RawRevealedCoords) -> Self {
+        RevealedCoords {
+            location_id: coords.0,
+            x: coords.1,
+            y: coords.2,
+            revealer: coords.3,
+        }
+    }
+}
