@@ -6,6 +6,9 @@ use serde::{Deserialize, Serialize};
 mod location;
 pub use location::*;
 
+mod info;
+pub use info::*;
+
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(u8)]
 /// The planet's type, depending on which the planet has additional functionalities

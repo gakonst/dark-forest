@@ -1,6 +1,6 @@
 use derive_more::AsRef;
 use ethers::types::U256;
-use serde::{Deserialize, Serialize, de};
+use serde::{de, Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, AsRef)]
 #[as_ref]
