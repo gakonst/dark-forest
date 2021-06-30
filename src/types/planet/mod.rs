@@ -1,19 +1,10 @@
-//! # Dark Forest Types
+//! # Dark Forest Planet Variant Types
 //!
 //! Planet-related types found in the [types contract](https://github.com/darkforest-eth/eth/blob/master/contracts/DarkForestTypes.sol#L9-L11)
-use derive_more::AsRef;
-use ethers::types::U256;
 use serde::{Deserialize, Serialize};
 
-#[derive(Default, Clone, Debug, Serialize, Deserialize, AsRef)]
-#[as_ref]
-/// Wrapper type for the planet's level (0-9)
-pub struct PlanetLevel(U256);
-impl From<U256> for PlanetLevel {
-    fn from(src: U256) -> PlanetLevel {
-        PlanetLevel(src)
-    }
-}
+mod location;
+pub use location::*;
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(u8)]
