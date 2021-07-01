@@ -529,13 +529,25 @@ name = "dark-forest"
 version = "0.1.0"
 dependencies = [
  "color-eyre",
+ "darkforest",
  "derive_more",
  "ethers",
  "once_cell",
  "serde",
  "serde_json",
  "structopt",
+ "thiserror",
  "tokio",
+]
+
+[[package]]
+name = "darkforest"
+version = "0.1.0"
+source = "git+https://github.com/projectsophon/darkforest-rs#3d47064b92068e19e4ded75acc3b846064fda8a6"
+dependencies = [
+ "lazy_static",
+ "mimc",
+ "serde",
 ]
 
 [[package]]
@@ -1365,6 +1377,14 @@ name = "memchr"
 version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b16bd47d9e329435e309c58469fe0791c2d0d1ba96ec0954152a5ae2b04387dc"
+
+[[package]]
+name = "mimc"
+version = "0.1.0"
+source = "git+https://github.com/projectsophon/darkforest-rs#3d47064b92068e19e4ded75acc3b846064fda8a6"
+dependencies = [
+ "primitive-types",
+]
 
 [[package]]
 name = "mime"

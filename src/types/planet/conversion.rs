@@ -28,7 +28,7 @@ impl From<&PlanetLocation> for PlanetLevel {
     /// and whether the planet's space depth
     fn from(loc: &PlanetLocation) -> Self {
         let space_type = SpaceType::from(loc);
-        let level = loc.hash.level().as_ref().as_u64();
+        let level = loc.hash.level().as_ref().as_u32();
 
         let mut res = constants::PLANET_LEVEL_MIN;
         for lvl in (constants::PLANET_LEVEL_MIN..constants::PLANET_LEVEL_MAX).rev() {

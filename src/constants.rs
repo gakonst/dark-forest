@@ -12,7 +12,7 @@ pub const INITIAL_WORLD_RADIUS: u64 = 8000;
 // SNARK keys & Perlin parameters //
 ////////////////////////////////////
 
-pub const PLANETHASH_KEY: u64 = 430;
+pub const PLANETHASH_KEY: u32 = 430;
 pub const SPACETYPE_KEY: u64 = 431;
 pub const BIOMEBASE_KEY: u64 = 432;
 pub const PERLIN_MIRROR_X: bool = false;
@@ -32,7 +32,7 @@ pub const INIT_PERLIN_MIN: u64 = 14;
 pub const INIT_PERLIN_MAX: u64 = 15;
 pub const BIOME_THRESHOLD_1: u64 = 15;
 pub const BIOME_THRESHOLD_2: u64 = 17;
-pub const PLANET_RARITY: u64 = 16384;
+pub const PLANET_RARITY: u32 = 16384;
 pub const PHOTOID_ACTIVATION_DELAY: u64 = 14400; // seconds
 pub const LOCATION_REVEAL_COOLDOWN: u64 = 86400; // seconds
 
@@ -89,7 +89,7 @@ pub const PLANET_TYPE_WEIGHTS: &[&[[u64; 5]]] = &[
 
 pub const ARTIFACT_POINT_VALUES: &[u64] = &[0, 5000, 20000, 240000, 3000000, 20000000];
 
-pub const PLANET_LEVEL_THRESHOLDS: &[u64] = &[
+pub const PLANET_LEVEL_THRESHOLDS: &[u32] = &[
     16777216, 4194292, 1048561, 262128, 65520, 16368, 4080, 1008, 240, 48,
 ];
 
