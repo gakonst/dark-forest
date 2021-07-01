@@ -2,6 +2,8 @@
 
 *Terminal UI implementation and types for the Dark Forest game*
 
+![Github Actions](https://github.com/gakonst/dark-forest/workflows/Tests/badge.svg)
+
 ## Development
 
 We use the standard Rust toolchain
@@ -18,7 +20,8 @@ cargo run
 * [ ] Dark Forest Types
     * [x] Map: Can read the map from the plugin
     * [ ] Planets
-        * [x] Planet Info
+        * [x] Info
+        * [x] Off-chain stats calculation for uninitialized planets
 * [ ] Actions
     * [ ] Planets
         * [ ] Moving
