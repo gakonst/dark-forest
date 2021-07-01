@@ -3,14 +3,14 @@ use std::{convert::TryFrom, sync::Arc};
 
 use ethers::{
     contract::ContractError,
-    providers::{Middleware, Provider, Http},
+    providers::{Http, Middleware, Provider},
     types::{TxHash, U256},
 };
 
 use crate::{
     bindings::{DarkForestCore, DarkForestGetters},
     config::{Config, Network},
-    types::planet::{PlanetInfo, PlanetLocation /*, UpgradeBranch */},
+    types::planet::{PlanetId, PlanetInfo, PlanetLocation, UpgradeBranch},
 };
 
 #[derive(Clone, Debug)]
@@ -47,6 +47,37 @@ impl<M: Middleware> Contracts<M> {
             .await?
             .next()
             .expect("planet not found"))
+    }
+
+    /// Given a planet's ID, return the planet w/ any non-initialized values set to its defaults
+    pub async fn planet_initialized(&self, id: PlanetId) -> Result<PlanetInfo, ContractError<M>> {
+        let planets = self
+            .getters
+            .bulk_get_planets_data_by_ids(vec![*id.as_ref()])
+            .call()
+            .await?;
+        let planet = PlanetInfo::from(planets[0]);
+        Ok(planet)
+    }
+
+    /// Given a planet's ID and upgrade branch, upgrade that planet
+    pub async fn upgrade_planet<T: AsRef<U256>>(
+        &self,
+        id: T,
+        branch: UpgradeBranch,
+    ) -> Result<TxHash, ContractError<M>> {
+        // TODO: Can we improve ethers-rs APIs to be able to return a Pending Transaction
+        // instead of derefing down to just the tx hash?
+        let call = self.core.upgrade_planet(*id.as_ref(), branch.into());
+        let pending_tx = call.send().await?;
+        Ok(*pending_tx)
+    }
+
+    /// Given a planet's ID, it prospects the planet (prepares it for finding an artifact)
+    pub async fn prospect_planet<T: AsRef<U256>>(&self, id: T) -> Result<TxHash, ContractError<M>> {
+        let call = self.core.prospect_planet(*id.as_ref());
+        let pending_tx = call.send().await?;
+        Ok(*pending_tx)
     }
 
     /// Given an iterator of planet IDs, return the planet infos
@@ -101,6 +132,17 @@ impl<M: Middleware> Contracts<M> {
 }
 
 #[cfg(test)]
-// TODO: Implement tests using Hardhat's docker mode
 mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn get_planet() {
+        let api = Contracts::new_xdai_readonly();
+        let loc = "000094c6002fd43d80ce2853a8e77a3d00488b0694aae4e4fa0ddc534e5e7531"
+            .parse::<U256>()
+            .unwrap();
+        let loc = PlanetId::from(loc);
+        let planet = api.planet_initialized(loc).await.unwrap();
+        dbg!(&planet);
+    }
 }

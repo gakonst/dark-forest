@@ -212,6 +212,17 @@ impl From<u8> for PlanetLevel {
     }
 }
 
+type RawPlanetInfo = (RawPlanet, RawPlanetExtendedInfo, RawRevealedCoords);
+impl From<RawPlanetInfo> for PlanetInfo {
+    fn from(planet: RawPlanetInfo) -> PlanetInfo {
+        PlanetInfo {
+            planet: planet.0.into(),
+            info: planet.1.into(),
+            coords: planet.2.into(),
+        }
+    }
+}
+
 // helper types to convert from the ethers-rs types to a type we can work with more
 // easily. ideally, ethers should do this for us.
 
