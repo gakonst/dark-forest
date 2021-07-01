@@ -1,27 +1,19 @@
 //! Business logic for calculating a planet's type, level as well as its space type
 //! from its coordinates
 use super::{
-    id::PlanetIdIdx, Bonus, PlanetId, PlanetInfo, PlanetLevel, PlanetLocation, PlanetType,
+    id::PlanetIdIdx, Bonus, Planet, PlanetId, PlanetInfo, PlanetLevel, PlanetLocation, PlanetType,
     SpaceType,
 };
 use crate::{constants, utils};
 use ethers::types::{H256, U256};
 
-// TODO: Finish this implementation
 impl From<&PlanetLocation> for PlanetInfo {
     /// Creates a "default" PlanetInfo object to load planets "lazily" when they
     /// have not been instantiated on-chain, given a planet's location
     fn from(loc: &PlanetLocation) -> Self {
         let mut planet = Self::default();
-
-        // initialize the stats & bonuses
-        planet.planet.apply_defaults(loc);
-        planet.planet.apply_bonuses(loc.hash);
-
+        planet.planet = Planet::new(loc);
         planet.info.space_type = SpaceType::from(loc);
-
-        // todo!("https://github.com/darkforest-eth/client/blob/0505b315362b9e87b3c021cdac6515ae3d5bcf09/src/Backend/GameLogic/GameObjects.ts#L1295");
-
         planet
     }
 }

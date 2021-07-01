@@ -3,27 +3,7 @@ use derive_more::AsRef;
 use ethers::types::{Address, U256};
 use serde::{Deserialize, Serialize};
 
-use super::{Bonus, PlanetLocation, PlanetType, SpaceType, DEFAULTS};
-
-#[derive(Default, Clone, Debug, Serialize, Deserialize, AsRef, PartialEq, Eq, PartialOrd, Ord)]
-#[as_ref]
-/// Wrapper type for the planet's level (0-9)
-pub struct PlanetLevel(U256);
-impl From<U256> for PlanetLevel {
-    fn from(src: U256) -> PlanetLevel {
-        PlanetLevel(src)
-    }
-}
-impl From<u64> for PlanetLevel {
-    fn from(src: u64) -> PlanetLevel {
-        PlanetLevel(src.into())
-    }
-}
-impl From<u8> for PlanetLevel {
-    fn from(src: u8) -> PlanetLevel {
-        PlanetLevel(src.into())
-    }
-}
+use super::{default::PlanetDefaultStats, Bonus, PlanetLocation, PlanetType, SpaceType, DEFAULTS};
 
 #[derive(Default, Clone, Debug, Serialize, Deserialize, AsRef)]
 /// Unified struct for accessing the planet's information
@@ -39,9 +19,8 @@ pub struct PlanetInfo {
     pub coords: RevealedCoords,
 }
 
-// https://github.com/darkforest-eth/eth/blob/58a529bdbb8fd2645f00424f28f86bd481a36822/contracts/DarkForestTypes.sol
-#[derive(Default, Clone, Debug, Serialize, Deserialize)]
-// TODO: Add docs
+#[derive(Default, Clone, Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
+/// A planet as fetched from the [Dark Forest types smart contract](https://github.com/darkforest-eth/eth/blob/58a529bdbb8fd2645f00424f28f86bd481a36822/contracts/DarkForestTypes.sol)
 pub struct Planet {
     pub owner: Address,
     pub range: U256,
@@ -59,13 +38,27 @@ pub struct Planet {
 }
 
 impl Planet {
+    /// Instantiates a new default planet from a given location
+    pub fn new(loc: &PlanetLocation) -> Self {
+        let mut planet = Self {
+            planet_level: PlanetLevel::from(loc),
+            planet_type: PlanetType::from(loc),
+            ..Default::default()
+        };
+
+        let defaults = &DEFAULTS[planet.planet_level.as_ref().as_usize()];
+        planet.apply_defaults(defaults);
+        planet.apply_bonuses(loc.hash);
+        planet.apply_space_modifiers(loc);
+        planet.apply_planet_modifiers();
+        planet.initialize_population(defaults.barbarian_percentage, loc);
+
+        planet
+    }
+
     /// Given a planet location, calculates the default planet stats for that planet
     /// before it's initialized
-    pub fn apply_defaults(&mut self, loc: &PlanetLocation) {
-        self.planet_level = PlanetLevel::from(loc);
-        self.planet_type = PlanetType::from(loc);
-
-        let defaults = &DEFAULTS[self.planet_level.as_ref().as_usize()];
+    fn apply_defaults(&mut self, defaults: &PlanetDefaultStats) {
         self.population_cap = defaults.population_cap;
         self.population_growth = defaults.population_growth;
         self.range = defaults.range;
@@ -73,13 +66,13 @@ impl Planet {
         self.defense = defaults.defense;
         self.silver_cap = defaults.silver_cap;
 
-        if self.planet_type == PlanetType::SilverMine {
+        if matches!(self.planet_type, PlanetType::SilverMine) {
             self.silver_growth = defaults.silver_growth;
         }
     }
 
     /// Provides 2x bonuses to the planet
-    pub fn apply_bonuses<T: Into<Bonus>>(&mut self, bonus: T) {
+    fn apply_bonuses<T: Into<Bonus>>(&mut self, bonus: T) {
         let bonus = bonus.into();
 
         if bonus.energy_cap {
@@ -101,6 +94,75 @@ impl Planet {
         if bonus.defense {
             self.defense *= 2;
         }
+    }
+
+    fn apply_planet_modifiers(&mut self) {
+        match self.planet_type {
+            PlanetType::SilverMine => {
+                // 50% full of silver at init time
+                self.silver = self.silver_cap;
+                self.silver_cap *= 2;
+                self.defense /= 2;
+            }
+            PlanetType::SilverBank => {
+                self.speed /= 2;
+                self.silver_cap *= 10;
+                self.population_growth = 0.into();
+                self.population_cap *= 5;
+            }
+            PlanetType::TradingPost => {
+                self.defense /= 2;
+                self.silver_cap *= 2;
+            }
+            _ => {}
+        }
+    }
+
+    /// The planet is buffed/de-buffed depending on what kind of space it exists on the map
+    fn apply_space_modifiers(&mut self, loc: &PlanetLocation) {
+        match SpaceType::from(loc) {
+            SpaceType::Nebula => {}
+            // 1.25x / low defense
+            SpaceType::Space => {
+                self.range += self.range / 4;
+                self.speed += self.speed / 4;
+                self.population_cap += self.population_cap / 4;
+                self.population_growth += self.population_growth / 4;
+                self.silver_cap += self.silver_cap / 4;
+                self.silver_growth += self.silver_growth / 4;
+                self.defense /= 2;
+            }
+            // 1.5x / very low defense
+            SpaceType::DeepSpace => {
+                self.range += self.range / 2;
+                self.speed += self.speed / 2;
+                self.population_cap += self.population_cap / 2;
+                self.population_growth += self.population_growth / 2;
+                self.silver_cap += self.silver_cap / 2;
+                self.silver_growth += self.silver_growth / 2;
+                self.defense /= 4;
+            }
+            // 2x / ultra low defense :RIP:
+            SpaceType::DeadSpace => {
+                self.range *= 2;
+                self.speed *= 2;
+                self.population_cap *= 2;
+                self.population_growth *= 2;
+                self.silver_cap *= 2;
+                self.silver_growth *= 2;
+                self.defense = (self.defense * 3) / 20;
+            }
+        };
+    }
+
+    fn initialize_population(&mut self, population_pct: U256, loc: &PlanetLocation) {
+        let multiplier = match SpaceType::from(loc) {
+            SpaceType::Nebula => 1,
+            SpaceType::Space => 4,
+            SpaceType::DeepSpace => 10,
+            SpaceType::DeadSpace => 20,
+        };
+        self.population = self.population_cap * population_pct / 100 * multiplier;
     }
 }
 
@@ -128,6 +190,26 @@ pub struct RevealedCoords {
     pub x: U256,
     pub y: U256,
     pub revealer: Address,
+}
+
+#[derive(Default, Clone, Debug, Serialize, Deserialize, AsRef, PartialEq, Eq, PartialOrd, Ord)]
+#[as_ref]
+/// Wrapper type for the planet's level (0-9)
+pub struct PlanetLevel(U256);
+impl From<U256> for PlanetLevel {
+    fn from(src: U256) -> PlanetLevel {
+        PlanetLevel(src)
+    }
+}
+impl From<u64> for PlanetLevel {
+    fn from(src: u64) -> PlanetLevel {
+        PlanetLevel(src.into())
+    }
+}
+impl From<u8> for PlanetLevel {
+    fn from(src: u8) -> PlanetLevel {
+        PlanetLevel(src.into())
+    }
 }
 
 // helper types to convert from the ethers-rs types to a type we can work with more
@@ -209,6 +291,53 @@ impl From<RawRevealedCoords> for RevealedCoords {
             x: coords.1,
             y: coords.2,
             revealer: coords.3,
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::types::planet::{Coords, PlanetId};
+
+    use super::*;
+
+    #[test]
+    fn planet_defaults() {
+        for (loc, expected) in &[(
+            PlanetLocation {
+                coords: Coords { x: 1000, y: 35 },
+                hash: PlanetId(
+                    U256::from_dec_str(
+                        "164243057202791301415869898658143659049636004896671108397268177219715975",
+                    )
+                    .unwrap(),
+                ),
+                perlin: 15,
+                biomebase: 16,
+            },
+            Planet {
+                // 265.50?
+                range: 265.into(),
+                // 112.50?
+                speed: 112.into(),
+                defense: 50.into(),
+
+                population: 60_000.into(),
+                population_cap: 600_000.into(),
+                population_growth: 1249.into(),
+
+                silver: 150_000.into(),
+                silver_growth: 84.into(),
+                silver_cap: 300_000.into(),
+
+                planet_level: PlanetLevel(U256::from(1)),
+                planet_type: PlanetType::SilverMine,
+
+                ..Default::default()
+            },
+        )] {
+            let planet = Planet::new(&loc);
+            assert_eq!(&planet, expected);
         }
     }
 }

@@ -3,7 +3,9 @@ use derive_more::AsRef;
 use ethers::types::U256;
 use serde::{de, Deserialize, Serialize};
 
-#[derive(Default, Debug, Clone, Copy, Serialize, Deserialize, AsRef)]
+#[derive(
+    Default, Debug, Clone, Copy, AsRef, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, Hash,
+)]
 #[as_ref]
 /// Wrapper type around the planet id, created by the MIMC hash of the coords
 pub struct PlanetId(pub U256);
@@ -66,7 +68,7 @@ where
     s.parse().map_err(de::Error::custom).map(PlanetId)
 }
 
-#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(rename_all = "camelCase")]
 /// Bonuses related to the planet's id
 pub struct Bonus {

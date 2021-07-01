@@ -4,7 +4,7 @@ use derive_more::AsRef;
 use ethers::types::U256;
 use serde::{Deserialize, Serialize};
 
-#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[serde(rename_all = "camelCase")]
 /// A planet's x,y coordinates on the map
 pub struct Coords {
@@ -14,7 +14,9 @@ pub struct Coords {
     pub y: i64,
 }
 
-#[derive(Default, Debug, Clone, Serialize, Deserialize, AsRef)]
+#[derive(
+    Default, Debug, Clone, Serialize, Deserialize, AsRef, PartialEq, Eq, PartialOrd, Ord, Hash,
+)]
 #[serde(rename_all = "camelCase")]
 /// A planet's location
 pub struct PlanetLocation {
