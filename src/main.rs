@@ -1,6 +1,6 @@
 use color_eyre::eyre::Result;
 use ethers::providers::{Http, Provider};
-use std::{convert::TryFrom, path::PathBuf, sync::Arc};
+use std::{collections::HashMap, convert::TryFrom, path::PathBuf, sync::Arc};
 use structopt::StructOpt;
 
 use dark_forest::{engine::Contracts, types::Map, Network};
@@ -30,8 +30,14 @@ async fn main() -> Result<()> {
     let mut locs = map.planets();
 
     while !locs.is_empty() {
-        let ids = locs.drain(..50);
-        let planets = contracts.planets(ids).await?;
+        let ids = locs.drain(..100).collect::<Vec<_>>();
+        let planets = contracts.planets_with_defaults(ids.clone()).await?;
+
+        let planets = planets
+            .zip(ids)
+            .map(|(planet, id)| (id, planet))
+            .collect::<HashMap<_, _>>();
+
         dbg!(planets);
     }
     Ok(())
