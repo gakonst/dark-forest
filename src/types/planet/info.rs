@@ -3,7 +3,7 @@ use derive_more::AsRef;
 use ethers::types::{Address, U256};
 use serde::{Deserialize, Serialize};
 
-use super::{PlanetType, SpaceType};
+use super::{Bonus, PlanetLocation, PlanetType, SpaceType, DEFAULTS};
 
 #[derive(Default, Clone, Debug, Serialize, Deserialize, AsRef, PartialEq, Eq, PartialOrd, Ord)]
 #[as_ref]
@@ -56,6 +56,52 @@ pub struct Planet {
     pub planet_level: PlanetLevel,
     pub planet_type: PlanetType,
     pub is_home: bool,
+}
+
+impl Planet {
+    /// Given a planet location, calculates the default planet stats for that planet
+    /// before it's initialized
+    pub fn apply_defaults(&mut self, loc: &PlanetLocation) {
+        self.planet_level = PlanetLevel::from(loc);
+        self.planet_type = PlanetType::from(loc);
+
+        let defaults = &DEFAULTS[self.planet_level.as_ref().as_usize()];
+        self.population_cap = defaults.population_cap;
+        self.population_growth = defaults.population_growth;
+        self.range = defaults.range;
+        self.speed = defaults.speed;
+        self.defense = defaults.defense;
+        self.silver_cap = defaults.silver_cap;
+
+        if self.planet_type == PlanetType::SilverMine {
+            self.silver_growth = defaults.silver_growth;
+        }
+    }
+
+    /// Provides 2x bonuses to the planet
+    pub fn apply_bonuses<T: Into<Bonus>>(&mut self, bonus: T) {
+        let bonus = bonus.into();
+
+        if bonus.energy_cap {
+            self.population_cap *= 2;
+        }
+
+        if bonus.energy_growth {
+            self.population_growth *= 2;
+        }
+
+        if bonus.range {
+            self.range *= 2;
+        }
+
+        if bonus.speed {
+            self.speed *= 2;
+        }
+
+        if bonus.defense {
+            self.defense *= 2;
+        }
+    }
 }
 
 #[derive(Default, Clone, Debug, Serialize, Deserialize)]

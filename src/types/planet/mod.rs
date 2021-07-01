@@ -17,6 +17,9 @@ mod conversion;
 mod upgrades;
 pub use upgrades::*;
 
+pub mod id;
+pub use id::{Bonus, PlanetId};
+
 #[derive(Copy, Clone, Debug, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(u8)]
 /// The planet's type, depending on which the planet has additional functionalities

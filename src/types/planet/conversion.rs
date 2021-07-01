@@ -1,9 +1,10 @@
 //! Business logic for calculating a planet's type, level as well as its space type
 //! from its coordinates
 use super::{
-    Bonus, PlanetId, PlanetInfo, PlanetLevel, PlanetLocation, PlanetType, SpaceType, DEFAULTS,
+    id::PlanetIdIdx, Bonus, PlanetId, PlanetInfo, PlanetLevel, PlanetLocation, PlanetType,
+    SpaceType,
 };
-use crate::constants;
+use crate::{constants, utils};
 use ethers::types::{H256, U256};
 
 // TODO: Finish this implementation
@@ -11,30 +12,13 @@ impl From<&PlanetLocation> for PlanetInfo {
     /// Creates a "default" PlanetInfo object to load planets "lazily" when they
     /// have not been instantiated on-chain, given a planet's location
     fn from(loc: &PlanetLocation) -> Self {
-        let level = PlanetLevel::from(loc);
-        let planet_type = PlanetType::from(loc);
-        let space_type = SpaceType::from(loc);
-        let bonus = Bonus::from(loc.hash);
-
-        let defaults = &DEFAULTS[level.as_ref().as_usize()];
         let mut planet = Self::default();
 
-        // initialize the planet's rarities
-        planet.planet.planet_level = level;
-        planet.planet.planet_type = planet_type;
-        planet.info.space_type = space_type;
-
         // initialize the stats & bonuses
-        planet.planet.population_cap = defaults.population_cap * bonus.energy_cap;
-        planet.planet.population_growth = defaults.population_growth * bonus.energy_growth;
-        planet.planet.range = defaults.range * bonus.range;
-        planet.planet.speed = defaults.speed * bonus.speed;
-        planet.planet.defense = defaults.defense * bonus.defense;
-        planet.planet.silver_cap = defaults.silver_cap;
+        planet.planet.apply_defaults(loc);
+        planet.planet.apply_bonuses(loc.hash);
 
-        if planet_type == PlanetType::SilverMine {
-            planet.planet.silver_growth = defaults.silver_growth;
-        }
+        planet.info.space_type = SpaceType::from(loc);
 
         // todo!("https://github.com/darkforest-eth/client/blob/0505b315362b9e87b3c021cdac6515ae3d5bcf09/src/Backend/GameLogic/GameObjects.ts#L1295");
 
@@ -110,7 +94,6 @@ impl From<&PlanetLocation> for PlanetType {
     }
 }
 
-// TODO: Add a graph showing how each attribute is derived from the planet id
 impl PlanetId {
     pub fn as_hash(&self) -> H256 {
         let mut bytes = [0; 32];
@@ -120,21 +103,22 @@ impl PlanetId {
 
     /// The Planet's type byte is the 8th byte in the 32 byte buffer
     pub fn type_byte(&self) -> u8 {
-        self.byte(8)
+        self.byte(PlanetIdIdx::TypeByte)
     }
 
     /// The Planet's level is calculated from the 4-6th bytes in the 32 byte buffer
     pub fn level(&self) -> PlanetLevel {
-        U256::from_big_endian(&self.bytes(4, 7)).into()
+        U256::from_big_endian(&self.bytes(PlanetIdIdx::LevelStart, PlanetIdIdx::LevelEnd)).into()
     }
 
-    pub fn bytes(&self, start: usize, end: usize) -> Vec<u8> {
-        (start..end).map(|i| self.byte(i)).collect::<Vec<u8>>()
+    /// Returns the (start..end)-th byte in reverse order from the PlanetId
+    pub fn bytes(&self, start: PlanetIdIdx, end: PlanetIdIdx) -> Vec<u8> {
+        utils::bytes(self.0, start as usize, end as usize)
     }
 
-    // bytes are read in reverse order
-    fn byte(&self, i: usize) -> u8 {
-        self.0.byte(32 - i - 1)
+    /// Returns the i-th byte in reverse order from the PlanetId
+    pub fn byte(&self, i: PlanetIdIdx) -> u8 {
+        utils::byte(self.0, i as usize)
     }
 }
 
@@ -187,7 +171,7 @@ impl PlanetLocation {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::planet::{location::deserialize_planet_id, Coords};
+    use crate::types::planet::{id::deserialize_planet_id, Coords, PlanetId};
     use serde::Deserialize;
 
     #[derive(Deserialize, Debug)]
