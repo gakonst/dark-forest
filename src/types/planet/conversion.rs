@@ -4,22 +4,27 @@ use super::{
     Bonus, PlanetId, PlanetInfo, PlanetLevel, PlanetLocation, PlanetType, SpaceType, DEFAULTS,
 };
 use crate::constants;
-use ethers::types::U256;
+use ethers::types::{H256, U256};
 
 // TODO: Finish this implementation
 impl From<&PlanetLocation> for PlanetInfo {
     /// Creates a "default" PlanetInfo object to load planets "lazily" when they
     /// have not been instantiated on-chain, given a planet's location
     fn from(loc: &PlanetLocation) -> Self {
-        let level = PlanetLevel::from(loc).as_ref().as_usize();
+        let level = PlanetLevel::from(loc);
         let planet_type = PlanetType::from(loc);
         let space_type = SpaceType::from(loc);
         let bonus = Bonus::from(loc.hash);
 
-        let defaults = &DEFAULTS[level];
+        let defaults = &DEFAULTS[level.as_ref().as_usize()];
         let mut planet = Self::default();
 
-        // initialize the planet's stats along with any bonuses that go with it
+        // initialize the planet's rarities
+        planet.planet.planet_level = level;
+        planet.planet.planet_type = planet_type;
+        planet.info.space_type = space_type;
+
+        // initialize the stats & bonuses
         planet.planet.population_cap = defaults.population_cap * bonus.energy_cap;
         planet.planet.population_growth = defaults.population_growth * bonus.energy_growth;
         planet.planet.range = defaults.range * bonus.range;
@@ -31,7 +36,7 @@ impl From<&PlanetLocation> for PlanetInfo {
             planet.planet.silver_growth = defaults.silver_growth;
         }
 
-        todo!("https://github.com/darkforest-eth/client/blob/0505b315362b9e87b3c021cdac6515ae3d5bcf09/src/Backend/GameLogic/GameObjects.ts#L1295");
+        // todo!("https://github.com/darkforest-eth/client/blob/0505b315362b9e87b3c021cdac6515ae3d5bcf09/src/Backend/GameLogic/GameObjects.ts#L1295");
 
         planet
     }
@@ -47,7 +52,7 @@ impl From<&PlanetLocation> for PlanetLevel {
 
         let mut res = constants::PLANET_LEVEL_MIN;
         for lvl in (constants::PLANET_LEVEL_MIN..constants::PLANET_LEVEL_MAX).rev() {
-            if lvl < level {
+            if level < constants::PLANET_LEVEL_THRESHOLDS[lvl as usize] {
                 res = lvl;
                 break;
             }
@@ -100,20 +105,36 @@ impl From<&PlanetLocation> for PlanetType {
             }
         }
 
-        panic!("Unknown planet type")
+        let err = format!("Unknown planet type {:#?}", loc);
+        panic!("{}", err)
     }
 }
 
 // TODO: Add a graph showing how each attribute is derived from the planet id
 impl PlanetId {
+    pub fn as_hash(&self) -> H256 {
+        let mut bytes = [0; 32];
+        self.0.to_big_endian(&mut bytes);
+        H256::from(bytes)
+    }
+
     /// The Planet's type byte is the 8th byte in the 32 byte buffer
     pub fn type_byte(&self) -> u8 {
-        self.0.byte(8)
+        self.byte(8)
     }
 
     /// The Planet's level is calculated from the 4-6th bytes in the 32 byte buffer
     pub fn level(&self) -> PlanetLevel {
-        U256::from_little_endian(&[self.0.byte(4), self.0.byte(5), self.0.byte(6)]).into()
+        U256::from_big_endian(&self.bytes(4, 7)).into()
+    }
+
+    pub fn bytes(&self, start: usize, end: usize) -> Vec<u8> {
+        (start..end).map(|i| self.byte(i)).collect::<Vec<u8>>()
+    }
+
+    // bytes are read in reverse order
+    fn byte(&self, i: usize) -> u8 {
+        self.0.byte(32 - i - 1)
     }
 }
 
@@ -160,5 +181,91 @@ impl PlanetLocation {
     /// Gets the planet's bonuses
     pub fn bonuses(&self) -> Bonus {
         self.hash.into()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::types::planet::{location::deserialize_planet_id, Coords};
+    use serde::{Deserialize, Serialize};
+
+    #[derive(Deserialize, Debug)]
+    #[serde(rename_all = "camelCase")]
+    struct PlanetTest {
+        inputs: Inputs,
+        intermediate_values: IntermediateValues,
+        outputs: Outputs,
+    }
+
+    #[derive(Deserialize, Debug)]
+    #[serde(rename_all = "camelCase")]
+    struct Inputs {
+        #[serde(deserialize_with = "deserialize_planet_id")]
+        hex: PlanetId,
+        perlin: u64,
+    }
+
+    #[derive(Deserialize, Debug)]
+    #[serde(rename_all = "camelCase")]
+    struct IntermediateValues {
+        weights: [u64; 5],
+        weight_sum: u64,
+        thresholds: [u64; 5],
+        type_byte: u8,
+    }
+
+    #[derive(Deserialize, Debug)]
+    #[serde(rename_all = "camelCase")]
+    struct Outputs {
+        planet_level: u8,
+        planet_type: u8,
+    }
+
+    #[test]
+    fn planet_level() {
+        let hash = "0000290408f351956089c045b04e062f7bbc8ae8cedfffed0e2a1f7f7c028139"
+            .parse::<U256>()
+            .unwrap();
+        let hash = PlanetId::from(hash);
+        // manually obtained value by running with the same args in the official
+        // client
+        assert_eq!(hash.level().as_ref().as_u64(), 586577);
+
+        let perlin = 13;
+        let location = PlanetLocation {
+            hash,
+            perlin,
+            ..Default::default()
+        };
+
+        let level = PlanetLevel::from(&location);
+        assert_eq!(level.as_ref().as_u64(), 2);
+    }
+
+    #[test]
+    fn planet_stats() {
+        // extracted by manually console log'ing and getting certain tests from this function
+        // https://github.com/darkforest-eth/client/blob/050b3e3545f28f559f89a95d41e6b31f916d043a/src/Backend/GameLogic/GameObjects.ts#L1254
+        let data = std::fs::read_to_string("./test-vectors/planets.json").unwrap();
+        let planet_tests: Vec<PlanetTest> = serde_json::from_str(&data).unwrap();
+
+        for case in planet_tests.into_iter().skip(1) {
+            let location = PlanetLocation {
+                hash: case.inputs.hex,
+                perlin: case.inputs.perlin,
+                // these don't matter
+                coords: Coords::default(),
+                biomebase: 0,
+            };
+
+            assert_eq!(location.level(), case.outputs.planet_level.into());
+            assert_eq!(
+                location.planet_type(),
+                PlanetType::from(case.outputs.planet_type)
+            );
+            // v0.6r2 is all Deep Space
+            assert_eq!(location.space_type(), SpaceType::DeepSpace);
+        }
     }
 }

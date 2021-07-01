@@ -2,12 +2,17 @@ use derive_more::AsRef;
 use ethers::types::U256;
 use serde::{de, Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, AsRef)]
+#[derive(Default, Debug, Clone, Copy, Serialize, Deserialize, AsRef)]
 #[as_ref]
 /// Wrapper type around the planet id, created by the MIMC hash of the coords
 pub struct PlanetId(pub U256);
+impl From<U256> for PlanetId {
+    fn from(src: U256) -> Self {
+        PlanetId(src)
+    }
+}
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 /// A planet's x,y coordinates on the map
 pub struct Coords {
@@ -17,7 +22,7 @@ pub struct Coords {
     pub y: i64,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, AsRef)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize, AsRef)]
 #[serde(rename_all = "camelCase")]
 /// A planet's location
 pub struct PlanetLocation {
@@ -43,7 +48,7 @@ impl AsRef<U256> for PlanetLocation {
 }
 
 // helper for deserializing hex strings not prefixed with 0x as the PlanetId
-fn deserialize_planet_id<'de, D>(deserializer: D) -> Result<PlanetId, D::Error>
+pub(crate) fn deserialize_planet_id<'de, D>(deserializer: D) -> Result<PlanetId, D::Error>
 where
     D: de::Deserializer<'de>,
 {
@@ -66,6 +71,12 @@ impl From<PlanetId> for Bonus {
     fn from(_src: PlanetId) -> Self {
         // depending on which bytes are set on the U256 bytes array
         // done in the `hexgen` package
-        todo!()
+        Self {
+            energy_growth: 1,
+            energy_cap: 1,
+            range: 1,
+            speed: 1,
+            defense: 1,
+        }
     }
 }

@@ -5,13 +5,23 @@ use serde::{Deserialize, Serialize};
 
 use super::{PlanetType, SpaceType};
 
-#[derive(Default, Clone, Debug, Serialize, Deserialize, AsRef)]
+#[derive(Default, Clone, Debug, Serialize, Deserialize, AsRef, PartialEq, Eq, PartialOrd, Ord)]
 #[as_ref]
 /// Wrapper type for the planet's level (0-9)
 pub struct PlanetLevel(U256);
 impl From<U256> for PlanetLevel {
     fn from(src: U256) -> PlanetLevel {
         PlanetLevel(src)
+    }
+}
+impl From<u64> for PlanetLevel {
+    fn from(src: u64) -> PlanetLevel {
+        PlanetLevel(src.into())
+    }
+}
+impl From<u8> for PlanetLevel {
+    fn from(src: u8) -> PlanetLevel {
+        PlanetLevel(src.into())
     }
 }
 
