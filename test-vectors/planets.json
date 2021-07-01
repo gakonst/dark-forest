@@ -1,0 +1,86 @@
+[
+    {
+        "inputs": {
+            "hex": "0000a578c99dc3c0f263831648d129beae07f00470a725ebc75026e9d8837bfa",
+            "perlin": 16
+        },
+        "intermediateValues": {
+            "weights": [
+                1,
+                0,
+                0,
+                0,
+                0
+            ],
+            "weightSum": 1,
+            "thresholds": [
+                0,
+                0,
+                0,
+                0,
+                0
+            ],
+            "typeByte": 242
+        },
+        "outputs": {
+            "planetLevel": 0,
+            "planetType": 0
+        }
+    },
+    {
+        "inputs": {
+            "hex": "0000bbfa18d15c222ffdb4336adad1b4deaa1c4d4f1109e6c6f0f7676b42bfc6",
+            "perlin": 16
+        },
+        "intermediateValues": {
+            "weights": [
+                10,
+                4,
+                2,
+                0,
+                0
+            ],
+            "weightSum": 16,
+            "thresholds": [
+                96,
+                32,
+                0,
+                0,
+                0
+            ],
+            "typeByte": 47
+        },
+        "outputs": {
+            "planetLevel": 1,
+            "planetType": 1
+        }
+    },
+    {
+    "inputs": {
+        "hex": "0000820f15b1a4ef16a5f4df8a04057136b7b3932953bfecff470237fe419615",
+        "perlin": 16
+    },
+    "intermediateValues": {
+        "weights": [
+            10,
+            4,
+            2,
+            0,
+            0
+        ],
+        "weightSum": 16,
+        "thresholds": [
+            96,
+            32,
+            0,
+            0,
+            0
+        ],
+        "typeByte": 22
+    },
+    "outputs": {
+        "planetLevel": 1,
+        "planetType": 2
+    }
+}
+]

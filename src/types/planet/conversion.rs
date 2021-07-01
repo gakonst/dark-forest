@@ -100,7 +100,7 @@ impl From<&PlanetLocation> for PlanetType {
         // find the type byte that first exceeds a threshold
         let type_byte = loc.hash.type_byte() as u64;
         for i in 0..thresholds.len() {
-            if type_byte > thresholds[i] {
+            if type_byte >= thresholds[i] {
                 return PlanetType::from(i as u8);
             }
         }
@@ -188,7 +188,7 @@ impl PlanetLocation {
 mod tests {
     use super::*;
     use crate::types::planet::{location::deserialize_planet_id, Coords};
-    use serde::{Deserialize, Serialize};
+    use serde::Deserialize;
 
     #[derive(Deserialize, Debug)]
     #[serde(rename_all = "camelCase")]
@@ -247,10 +247,10 @@ mod tests {
     fn planet_stats() {
         // extracted by manually console log'ing and getting certain tests from this function
         // https://github.com/darkforest-eth/client/blob/050b3e3545f28f559f89a95d41e6b31f916d043a/src/Backend/GameLogic/GameObjects.ts#L1254
-        let data = std::fs::read_to_string("./test-vectors/planets.json").unwrap();
+        let data = std::fs::read_to_string("./test-vectors/many-planets.json").unwrap();
         let planet_tests: Vec<PlanetTest> = serde_json::from_str(&data).unwrap();
 
-        for case in planet_tests.into_iter().skip(1) {
+        for case in planet_tests.into_iter() {
             let location = PlanetLocation {
                 hash: case.inputs.hex,
                 perlin: case.inputs.perlin,
