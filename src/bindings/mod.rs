@@ -1,3 +1,6 @@
+// TODO: Fix these warnings in ethers-rs
+#![allow(clippy::type_complexity)]
+#![allow(clippy::redundant_clone)]
 mod darkforesttypes;
 pub use darkforesttypes::*;
 

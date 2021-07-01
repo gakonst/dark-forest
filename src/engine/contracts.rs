@@ -25,7 +25,7 @@ impl<M: Middleware> Contracts<M> {
 
         Self {
             core: DarkForestCore::new(cfg.core, provider.clone()),
-            getters: DarkForestGetters::new(cfg.getters, provider.clone()),
+            getters: DarkForestGetters::new(cfg.getters, provider),
         }
     }
 

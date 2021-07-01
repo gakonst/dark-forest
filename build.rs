@@ -3,7 +3,7 @@ use ethers::contract::Abigen;
 
 // const OUR_CONTRACTS: &[&'static str] = &[
 
-const DF_CONTRACTS: &[&'static str] = &[
+const DF_CONTRACTS: &[&str] = &[
     "DarkForestCore",
     "DarkForestGPTCredit",
     "DarkForestGetters",
@@ -33,7 +33,7 @@ fn main() {
 }
 
 #[allow(dead_code)]
-fn bindgen(fname: &str) {
+fn bindgen(fname: &'static str) {
     let abigen =
         Abigen::new(fname, format!("./abis/{}.json", fname)).expect("could not instantiate Abigen");
 
@@ -48,7 +48,7 @@ fn bindgen(fname: &str) {
 
     let bindings = abigen
         .generate()
-        .expect(&format!("could not generate bindings for {}", fname));
+        .unwrap_or_else(|_| panic!("could not generate bindings for {}", fname));
 
     bindings
         .write_to_file(format!("./src/bindings/{}.rs", fname.to_lowercase()))

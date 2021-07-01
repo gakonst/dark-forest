@@ -14,9 +14,6 @@ pub use default::DEFAULTS;
 
 mod conversion;
 
-mod upgrades;
-pub use upgrades::*;
-
 pub mod id;
 pub use id::{Bonus, PlanetId};
 

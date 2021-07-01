@@ -1,8 +1,8 @@
 //! Business logic for calculating a planet's type, level as well as its space type
 //! from its coordinates
 use super::{
-    id::PlanetIdIdx, Bonus, Planet, PlanetId, PlanetInfo, PlanetLevel, PlanetLocation, PlanetType,
-    SpaceType,
+    id::PlanetIdIdx, Bonus, Planet, PlanetExtendedInfo, PlanetId, PlanetInfo, PlanetLevel,
+    PlanetLocation, PlanetType, SpaceType,
 };
 use crate::{constants, utils};
 use ethers::types::{H256, U256};
@@ -11,10 +11,14 @@ impl From<&PlanetLocation> for PlanetInfo {
     /// Creates a "default" PlanetInfo object to load planets "lazily" when they
     /// have not been instantiated on-chain, given a planet's location
     fn from(loc: &PlanetLocation) -> Self {
-        let mut planet = Self::default();
-        planet.planet = Planet::new(loc);
-        planet.info.space_type = SpaceType::from(loc);
-        planet
+        PlanetInfo {
+            planet: Planet::new(loc),
+            info: PlanetExtendedInfo {
+                space_type: SpaceType::from(loc),
+                ..Default::default()
+            },
+            coords: Default::default(),
+        }
     }
 }
 
@@ -66,7 +70,7 @@ impl From<&PlanetLocation> for PlanetType {
         // calculate the thresholds array
         let mut thresholds = vec![weight_sum - weights[0]];
         for i in 1..weights.len() {
-            thresholds.push(thresholds[i - 1] - &weights[i]);
+            thresholds.push(thresholds[i - 1] - weights[i]);
         }
         thresholds = thresholds
             .iter()
@@ -75,8 +79,8 @@ impl From<&PlanetLocation> for PlanetType {
 
         // find the type byte that first exceeds a threshold
         let type_byte = loc.hash.type_byte() as u64;
-        for i in 0..thresholds.len() {
-            if type_byte >= thresholds[i] {
+        for (i, threshold) in thresholds.iter().enumerate() {
+            if &type_byte >= threshold {
                 return PlanetType::from(i as u8);
             }
         }
