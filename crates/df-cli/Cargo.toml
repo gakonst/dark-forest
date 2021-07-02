@@ -1,0 +1,13 @@
+[package]
+name = "df-cli"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+structopt = "0.3.21"
+color-eyre = "0.5.11"
+
+dark-forest = { path = "../dark-forest" }
+ethers = { git = "https://github.com/gakonst/ethers-rs" }
+tokio = { version = "1.7.1", features = ["macros"] }
+serde_json = "1.0.64"
