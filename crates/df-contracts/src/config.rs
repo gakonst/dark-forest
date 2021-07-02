@@ -1,4 +1,4 @@
-use crate::utils::addr;
+use crate::addr;
 use ethers::types::Address;
 
 /// The networks where the Dark Forest contracts are deployed at

@@ -1,12 +1,8 @@
 use darkforest_mimc::{threshold, U512};
-use ethers::{types::Address, types::U256};
+use ethers::types::U256;
 use once_cell::sync::Lazy;
 
 use crate::constants;
-
-pub fn addr(s: &str) -> Address {
-    s.parse().unwrap()
-}
 
 /// read bytes in the <start..end> in reverse order from H256/U256 types
 pub fn bytes(buf: U256, start: usize, end: usize) -> Vec<u8> {

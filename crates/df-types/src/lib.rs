@@ -7,9 +7,6 @@
 //! Learn more at the [blog](https://blog.zkga.me)
 mod utils;
 
-mod config;
-pub use config::{Config, Network};
-
 pub mod constants;
 
 pub mod map;

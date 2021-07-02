@@ -464,6 +464,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "df-contracts"
+version = "0.1.0"
+dependencies = [
+ "ethers",
+ "serde_json",
+]
+
+[[package]]
 name = "df-types"
 version = "0.1.0"
 dependencies = [
