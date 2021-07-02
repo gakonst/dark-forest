@@ -308,7 +308,7 @@ impl From<RawRevealedCoords> for RevealedCoords {
 
 #[cfg(test)]
 mod tests {
-    use crate::types::planet::{Coords, PlanetId};
+    use crate::planet::{Coords, PlanetId};
 
     use super::*;
 

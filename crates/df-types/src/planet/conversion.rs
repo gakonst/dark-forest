@@ -1,10 +1,15 @@
 //! Business logic for calculating a planet's type, level as well as its space type
 //! from its coordinates
-use super::{
-    id::PlanetIdIdx, Bonus, Planet, PlanetExtendedInfo, PlanetId, PlanetInfo, PlanetLevel,
-    PlanetLocation, PlanetType, SpaceType,
+use crate::{
+    constants,
+    planet::{
+        id::{Bonus, PlanetId, PlanetIdIdx},
+        info::{Planet, PlanetExtendedInfo, PlanetInfo, PlanetLevel},
+        location::PlanetLocation,
+        PlanetType, SpaceType,
+    },
+    utils,
 };
-use crate::{constants, utils};
 use ethers::types::{H256, U256};
 
 impl From<&PlanetLocation> for PlanetInfo {
@@ -167,7 +172,10 @@ impl PlanetLocation {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::planet::{id::deserialize_planet_id, Coords, PlanetId};
+    use crate::{
+        planet::{id::deserialize_planet_id, Coords, PlanetId},
+        utils::root_path,
+    };
     use serde::Deserialize;
 
     #[derive(Deserialize, Debug)]
@@ -227,7 +235,9 @@ mod tests {
     fn planet_stats() {
         // extracted by manually console log'ing and getting certain tests from this function
         // https://github.com/darkforest-eth/client/blob/050b3e3545f28f559f89a95d41e6b31f916d043a/src/Backend/GameLogic/GameObjects.ts#L1254
-        let data = std::fs::read_to_string("./test-vectors/many-planets.json").unwrap();
+        let path = root_path("../../test-vectors/many-planets.json");
+        dbg!(&path);
+        let data = std::fs::read_to_string(path).unwrap();
         let planet_tests: Vec<PlanetTest> = serde_json::from_str(&data).unwrap();
 
         for case in planet_tests.into_iter() {

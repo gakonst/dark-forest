@@ -4,3 +4,5 @@ pub use map::Map;
 
 pub mod planet;
 // TODO: Add artifacts module
+
+// pub mod snark;

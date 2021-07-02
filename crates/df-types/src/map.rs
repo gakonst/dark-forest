@@ -36,10 +36,12 @@ pub struct ChunkFootprint {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::utils::root_path;
 
     #[test]
     fn serde_map() {
-        let map = std::fs::read_to_string("./test-vectors/large-map.json").unwrap();
+        let path = root_path("../../test-vectors/large-map.json");
+        let map = std::fs::read_to_string(path).unwrap();
         let map: Map = serde_json::from_str(&map).unwrap();
         println!("{:#?}", map);
     }
