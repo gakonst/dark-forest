@@ -433,6 +433,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "dark-forest"
+version = "0.1.0"
+dependencies = [
+ "df-contracts",
+ "df-engine",
+ "df-types",
+]
+
+[[package]]
 name = "darkforest"
 version = "0.1.0"
 source = "git+https://github.com/projectsophon/darkforest-rs#3d47064b92068e19e4ded75acc3b846064fda8a6"
