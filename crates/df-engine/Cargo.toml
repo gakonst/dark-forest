@@ -1,0 +1,13 @@
+[package]
+name = "df-engine"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+df-types = { path = "../df-types" }
+df-contracts = { path = "../df-contracts" }
+
+ethers = { git = "https://github.com/gakonst/ethers-rs" }
+
+[dev-dependencies]
+tokio = { version = "1.7.1", features = ["macros"] }
