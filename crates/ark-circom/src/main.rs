@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 
-use ark_circom::{BigInt, WitnessCalculator};
+use ark_circom::WitnessCalculator;
 use color_eyre::Result;
+use num_bigint::BigInt;
 
 fn main() -> Result<()> {
     let mut wtns_calc = WitnessCalculator::new("/Users/Georgios/paradigm/portfolio/dforest/dark-forest/crates/ark-circom/test-vectors/mycircuit.wasm")?;
