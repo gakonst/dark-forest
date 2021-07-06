@@ -235,11 +235,17 @@ mod tests {
         witness: &'a [&'a str],
     }
 
+    pub fn root_path(p: &str) -> String {
+        let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        path.push(p);
+        path.to_string_lossy().to_string()
+    }
+
     #[test]
     fn multiplier_1() {
         run_test(TestCase {
-            circuit_path: "/Users/Georgios/paradigm/portfolio/dforest/dark-forest/crates/ark-circom/test-vectors/mycircuit.wasm",
-            inputs_path: "/Users/Georgios/paradigm/portfolio/dforest/dark-forest/crates/ark-circom/test-vectors/mycircuit-input1.json",
+            circuit_path: root_path("test-vectors/mycircuit.wasm").as_str(),
+            inputs_path: root_path("test-vectors/mycircuit-input1.json").as_str(),
             n_vars: 4,
             n64: 4,
             witness: &["1", "33", "3", "11"],
@@ -249,22 +255,48 @@ mod tests {
     #[test]
     fn multiplier_2() {
         run_test(TestCase {
-            circuit_path: "/Users/Georgios/paradigm/portfolio/dforest/dark-forest/crates/ark-circom/test-vectors/mycircuit.wasm",
-            inputs_path: "/Users/Georgios/paradigm/portfolio/dforest/dark-forest/crates/ark-circom/test-vectors/mycircuit-input2.json",
+            circuit_path: root_path("test-vectors/mycircuit.wasm").as_str(),
+            inputs_path: root_path("test-vectors/mycircuit-input2.json").as_str(),
             n_vars: 4,
             n64: 4,
-            witness: &["1","21888242871839275222246405745257275088548364400416034343698204186575672693159","21888242871839275222246405745257275088548364400416034343698204186575796149939","11"],
+            witness: &[
+                "1",
+                "21888242871839275222246405745257275088548364400416034343698204186575672693159",
+                "21888242871839275222246405745257275088548364400416034343698204186575796149939",
+                "11",
+            ],
         });
     }
 
     #[test]
     fn multiplier_3() {
         run_test(TestCase {
-            circuit_path: "/Users/Georgios/paradigm/portfolio/dforest/dark-forest/crates/ark-circom/test-vectors/mycircuit.wasm",
-            inputs_path: "/Users/Georgios/paradigm/portfolio/dforest/dark-forest/crates/ark-circom/test-vectors/mycircuit-input3.json",
+            circuit_path: root_path("test-vectors/mycircuit.wasm").as_str(),
+            inputs_path: root_path("test-vectors/mycircuit-input3.json").as_str(),
             n_vars: 4,
             n64: 4,
-            witness: &["1","21888242871839275222246405745257275088548364400416034343698204186575808493616","10944121435919637611123202872628637544274182200208017171849102093287904246808","2"],
+            witness: &[
+                "1",
+                "21888242871839275222246405745257275088548364400416034343698204186575808493616",
+                "10944121435919637611123202872628637544274182200208017171849102093287904246808",
+                "2",
+            ],
+        });
+    }
+
+    #[test]
+    fn smt_verifier() {
+        let witness =
+            std::fs::read_to_string(&root_path("test-vectors/smtverifier10-witness.json")).unwrap();
+        let witness: Vec<String> = serde_json::from_str(&witness).unwrap();
+        let witness = &witness.iter().map(|x| x.as_ref()).collect::<Vec<_>>();
+
+        run_test(TestCase {
+            circuit_path: root_path("test-vectors/smtverifier10.wasm").as_str(),
+            inputs_path: root_path("test-vectors/smtverifier10-input.json").as_str(),
+            n_vars: 4794,
+            n64: 4,
+            witness,
         });
     }
 
