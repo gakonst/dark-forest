@@ -68,3 +68,5 @@
 
 mod circom_wasm;
 pub use circom_wasm::WitnessCalculator;
+
+pub mod circuit;
