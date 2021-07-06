@@ -1,13 +1,15 @@
 //! Safe-ish interface for reading and writing specific types to the WASM runtime's memory
+use num_traits::ToPrimitive;
 use wasmer::{Memory, MemoryView};
 
 // TODO: Decide whether we want Ark here or if it should use a generic BigInt package
 use ark_bn254::FrParameters;
-use ark_ff::{BigInteger, BigInteger256 as BigInt, FpParameters, FromBytes};
+use ark_ff::{BigInteger, BigInteger256, FpParameters, FromBytes, Zero};
 
+use num_bigint::{BigInt, BigUint, Sign};
 
 use color_eyre::Result;
-use std::ops::Deref;
+use std::{convert::TryFrom, ops::Deref};
 
 #[derive(Clone, Debug)]
 pub struct SafeMem {
@@ -15,6 +17,8 @@ pub struct SafeMem {
 
     short_max: BigInt,
     short_min: BigInt,
+    pub prime: BigInt,
+    n32: usize,
 }
 
 impl Deref for SafeMem {
@@ -26,15 +30,19 @@ impl Deref for SafeMem {
 }
 
 impl SafeMem {
-    pub fn new(memory: Memory) -> Self {
-        let short_max = BigInt::from(0x80000000u64);
-        let mut short_min = FrParameters::MODULUS;
-        short_min.sub_noborrow(&short_max);
+    pub fn new(memory: Memory, n32: usize, prime: BigInt) -> Self {
+        let short_max = BigInt::from(0x8000_0000u64);
+        let short_min = BigInt::from_biguint(
+            num_bigint::Sign::NoSign,
+            BigUint::try_from(FrParameters::MODULUS).unwrap(),
+        ) - &short_max;
 
         Self {
             memory,
-            short_min,
             short_max,
+            short_min,
+            prime,
+            n32,
         }
     }
 
@@ -81,26 +89,13 @@ impl SafeMem {
         p
     }
 
-    pub fn read_big(&self, ptr: usize, num_bytes: usize) -> Result<BigInt> {
-        let buf = unsafe { self.memory.data_unchecked() };
-        let buf = &buf[ptr..ptr + num_bytes * 32];
-        Ok(BigInt::read(buf).unwrap())
-    }
-
-    pub fn write_big(&self, ptr: usize, num: BigInt) -> Result<()> {
-        let buf = unsafe { self.memory.data_unchecked_mut() };
-        let bytes = num.to_bytes_le();
-        let len = bytes.len();
-
-        buf[ptr..ptr + len].copy_from_slice(&bytes);
-        Ok(())
-    }
-
-    pub fn write_fr(&mut self, ptr: usize, fr: BigInt) -> Result<()> {
-        if fr < self.short_max {
-            self.write_short_positive(ptr, fr)?;
-        } else if fr > self.short_min {
-            self.write_short_negative(ptr, fr)?;
+    pub fn write_fr(&mut self, ptr: usize, fr: &BigInt) -> Result<()> {
+        if fr < &self.short_max && fr > &self.short_min {
+            if fr >= &BigInt::zero() {
+                self.write_short_positive(ptr, fr)?;
+            } else {
+                self.write_short_negative(ptr, fr)?;
+            }
         } else {
             self.write_long_normal(ptr, fr)?;
         }
@@ -108,34 +103,79 @@ impl SafeMem {
         Ok(())
     }
 
-    fn write_short_positive(&mut self, ptr: usize, fr: BigInt) -> Result<()> {
-        let num = fr.0[0] as u32;
+    // https://github.com/iden3/go-circom-witnesscalc/blob/25592ab9b33bf8d6b99c133783bd208bee7a935c/witnesscalc.go#L410-L430
+    // TODO: Figure out WTF all this parsing is for
+    pub fn read_fr(&self, ptr: usize) -> Result<BigInt> {
+        let view = self.memory.view::<u32>();
+
+        let res = if view[ptr + 1].get() & 0x80000000 != 0 {
+            let num = self.read_big(ptr + 8, self.n32)?;
+            num
+        } else {
+            // read the number
+            let mut res = self.read_big(ptr, 4).unwrap();
+
+            // adjust the sign if negative
+            if view[ptr].get() & 0x80000000 != 0 {
+                res -= BigInt::from(0x100000000i64)
+            }
+            res
+        };
+
+        Ok(res)
+    }
+
+    fn write_short_positive(&mut self, ptr: usize, fr: &BigInt) -> Result<()> {
+        let num = fr.to_i32().expect("not a short positive");
+        self.write_u32(ptr, num as u32);
+        self.write_u32(ptr + 4, 0);
+        Ok(())
+    }
+
+    fn write_short_negative(&mut self, ptr: usize, fr: &BigInt) -> Result<()> {
+        let num = fr - &self.short_min;
+        let num = num - &self.short_max;
+        let num = num + BigInt::from(0x0001_0000_0000i64);
+
+        let num = num
+            .to_u32()
+            .expect("could not cast as u32 (should never happen)");
+
         self.write_u32(ptr, num);
         self.write_u32(ptr + 4, 0);
         Ok(())
     }
 
-    fn write_short_negative(&mut self, ptr: usize, mut fr: BigInt) -> Result<()> {
-        // prime
-        let mut v_neg = FrParameters::MODULUS;
-        // prime - max
-        v_neg.sub_noborrow(&self.short_max);
-        // fr - (prime - max)
-        fr.sub_noborrow(&v_neg);
-        // max + (v - (prime - max))
-        let mut res = self.short_max;
-        res.add_nocarry(&fr);
-
-        self.write_u32(ptr, res.0[0] as u32);
-        self.write_u32(ptr + 4, 0);
+    fn write_long_normal(&mut self, ptr: usize, fr: &BigInt) -> Result<()> {
+        self.write_u32(ptr, 0);
+        self.write_u32(ptr + 4, i32::MIN as u32); // 0x80000000
+        self.write_big(ptr + 8, fr)?;
         Ok(())
     }
 
-    fn write_long_normal(&mut self, ptr: usize, fr: BigInt) -> Result<()> {
-        self.write_u32(ptr, 0);
-        self.write_u32(ptr + 4, i32::MIN as u32);
-        self.write_big(ptr + 8, fr)?;
+    fn write_big(&self, ptr: usize, num: &BigInt) -> Result<()> {
+        let buf = unsafe { self.memory.data_unchecked_mut() };
+
+        // always positive?
+        let (_, num) = num.clone().into_parts();
+        let num = BigInteger256::try_from(num).unwrap();
+
+        let bytes = num.to_bytes_le();
+        let len = bytes.len();
+        buf[ptr..ptr + len].copy_from_slice(&bytes);
+
         Ok(())
+    }
+
+    pub fn read_big(&self, ptr: usize, num_bytes: usize) -> Result<BigInt> {
+        let buf = unsafe { self.memory.data_unchecked() };
+        let buf = &buf[ptr..ptr + num_bytes * 32];
+
+        // TODO: Is there a better way to read big integers?
+        let big = BigInteger256::read(buf).unwrap();
+        dbg!(&big);
+        let big = BigUint::try_from(big).unwrap();
+        Ok(big.into())
     }
 }
 
@@ -149,10 +189,27 @@ impl SafeMem {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use num_traits::ToPrimitive;
+    use std::str::FromStr;
     use wasmer::{MemoryType, Store};
 
     fn new() -> SafeMem {
-        SafeMem::new(Memory::new(&Store::default(), MemoryType::new(1, None, false)).unwrap())
+        SafeMem::new(
+            Memory::new(&Store::default(), MemoryType::new(1, None, false)).unwrap(),
+            2,
+            BigInt::from_str(
+                "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+            )
+            .unwrap(),
+        )
+    }
+
+    #[test]
+    fn i32_bounds() {
+        let mem = new();
+        let i32_max = i32::MAX as i64 + 1;
+        assert_eq!(mem.short_min.to_i64().unwrap(), -i32_max);
+        assert_eq!(mem.short_max.to_i64().unwrap(), i32_max);
     }
 
     #[test]
@@ -163,34 +220,45 @@ mod tests {
         let inp = mem.read_u32(0);
         assert_eq!(inp, 0);
 
-
         mem.write_u32(0, num);
         let inp = mem.read_u32(0);
         assert_eq!(inp, num);
     }
 
     #[test]
-    fn read_write_short_positive_bigint() {
+    fn read_write_fr_small_positive() {
+        read_write_fr(BigInt::from(1_000_000), BigInt::from(1_000_000));
+    }
+
+    #[test]
+    fn read_write_fr_small_negative() {
+        read_write_fr(
+            BigInt::from(-1_000_000),
+            BigInt::from(-1_000_000),
+        );
+    }
+
+    #[test]
+    fn read_write_fr_big_positive() {
+        read_write_fr(BigInt::from(500000000000i64), BigInt::from(500000000000i64));
+    }
+
+    // TODO: How should this be handled?
+    #[test]
+    fn read_write_fr_big_negative() {
+        read_write_fr(
+            BigInt::from_str("-500000000000").unwrap(),
+            BigInt::from_str("-500000000000").unwrap(),
+            // "21888242871839275222246405745257275088548364400416034343698204186574024701953"
+            //     .parse()
+            //     .unwrap(),
+        )
+    }
+
+    fn read_write_fr(num: BigInt, expected: BigInt) {
         let mut mem = new();
-        let num = u32::MAX;
-
-        let inp = mem.read_u32(0);
-        assert_eq!(inp, 0);
-
-
-        mem.write_u32(0, num);
-        let inp = mem.read_u32(0);
-        assert_eq!(inp, num);
-
-    }
-
-    #[test]
-    fn read_write_short_negative_bigint() {
-
-    }
-
-    #[test]
-    fn read_write_long_normal_bigint() {
-
+        mem.write_fr(0, &num).unwrap();
+        let res = mem.read_fr(0).unwrap();
+        assert_eq!(res, expected);
     }
 }

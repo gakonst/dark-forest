@@ -69,7 +69,7 @@
 pub mod wasm;
 pub use wasm::WitnessCalculator;
 
-mod memory;
+pub mod memory;
 
 use fnv::FnvHasher;
 use std::hash::Hasher;
@@ -84,5 +84,5 @@ pub(crate) fn fnv(inp: &str) -> (u32, u32) {
     hasher.write(inp.as_bytes());
     let h = hasher.finish();
 
-    ((h >> 32) as u32, h as u32 & 0xffffffffu32)
+    ((h >> 32) as u32, h as u32)
 }

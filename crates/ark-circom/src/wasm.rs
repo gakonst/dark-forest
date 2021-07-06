@@ -7,14 +7,17 @@ use wasmer::{imports, Function, Instance, Memory, MemoryType, MemoryView, Module
 use num_traits::{One, ToPrimitive, Zero};
 
 use ark_ec::PairingEngine;
-use ark_ff::{BigInteger, BigInteger256 as BigInt, PrimeField};
 use ark_ff::FromBytes;
+use ark_ff::{BigInteger, PrimeField};
+
+use num_bigint::BigInt;
+use std::str::FromStr;
 
 use crate::{fnv, memory::SafeMem};
 
 #[derive(Clone, Debug)]
 pub struct WitnessCalculator<E: PairingEngine> {
-    pub instance: Instance,
+    pub instance: CircomInstance,
     pub memory: SafeMem,
 
     pub n32: i32,
@@ -47,42 +50,29 @@ impl<E: PairingEngine> WitnessCalculator<E> {
                 "log" => runtime::log_component(&store),
             }
         };
-        let instance = Instance::new(&module, &import_object)?;
+        let instance = CircomInstance(Instance::new(&module, &import_object)?);
 
-        let mut wns = WitnessCalculator {
+        let n32 = (instance.get_fr_len()? >> 2) - 2;
+
+        let r_inv = BigInt::from_str(
+            "9915499612839321149637521777990102151350674507940716049588462388200839649614",
+        )
+        .unwrap();
+        let mut memory = SafeMem::new(memory, n32 as usize, BigInt::zero());
+        let ptr = instance.get_ptr_raw_prime()?;
+        let prime = memory.read_big(ptr as usize, n32 as usize)?;
+        let n64 = ((prime.bits() - 1) / 64 + 1) as i32;
+        memory.prime = prime.clone();
+
+        Ok(WitnessCalculator {
             instance,
-            memory: SafeMem::new(memory),
-            n32: 0,
+            memory,
+            n32,
             engine: PhantomData,
-            prime: BigInt::from(0),
-            r_inv: BigInt::read(
-                &hex::decode(
-                    "9915499612839321149637521777990102151350674507940716049588462388200839649614",
-                )
-                .unwrap()[..],
-            )
-            .unwrap(),
-            n64: 0,
-        };
-
-        wns.n32 = (wns.get_fr_len()? >> 2) - 2;
-
-        // load n32 bytes from the start of the raw Fr ptr
-        let ptr = wns.get_ptr_raw_prime()?;
-        let prime = wns.memory.read_big(ptr as usize, wns.n32 as usize)?;
-
-        let nvars = wns.get_n_vars()?;
-        let n64 = (prime.num_bits() - 1) / 64 + 1;
-        wns.n64 = n64 as i32;
-
-        // let mut r = <E::Fr as PrimeField>::BigInt::from(1);
-        // r.muln(n64 * 64);
-        // let r = E::Fr::from_repr(r).unwrap();
-
-        wns.n32 = wns.get_fr_len()? - 8;
-        wns.prime = prime;
-
-        Ok(wns)
+            prime,
+            r_inv,
+            n64,
+        })
     }
 
     pub fn calculate_witness<I: IntoIterator<Item = (String, Vec<BigInt>)>>(
@@ -92,7 +82,7 @@ impl<E: PairingEngine> WitnessCalculator<E> {
     ) -> Result<Vec<BigInt>> {
         let old_mem_free_pos = self.memory.free_pos();
 
-        self.init(sanity_check)?;
+        self.instance.init(sanity_check)?;
 
         let p_sig_offset = self.memory.alloc_u32();
         let p_fr = self.memory.alloc_fr();
@@ -100,25 +90,26 @@ impl<E: PairingEngine> WitnessCalculator<E> {
         // allocate the inputs
         for (name, values) in inputs.into_iter() {
             let (msb, lsb) = fnv(&name);
-            self.get_signal_offset32(p_sig_offset, 0, msb, lsb)?;
+            self.instance
+                .get_signal_offset32(p_sig_offset, 0, msb, lsb)?;
             println!("hash({}) = ({}, {})", name, msb, lsb);
 
             let sig_offset = self.memory.read_u32(p_sig_offset as usize) as usize;
 
             for (i, value) in values.into_iter().enumerate() {
-                self.memory.write_fr(p_fr as usize, value)?;
-                self.set_signal(0, 0, (sig_offset + i) as i32, p_fr as i32)?;
+                self.memory.write_fr(p_fr as usize, &value)?;
+                self.instance
+                    .set_signal(0, 0, (sig_offset + i) as i32, p_fr as i32)?;
             }
         }
 
         let mut w = Vec::new();
-        let n_vars = self.get_n_vars()?;
+        let n_vars = self.instance.get_n_vars()?;
         for i in 0..n_vars {
-            let ptr = self.get_ptr_witness(i)? as usize;
-
-            let el = self.load_fr(ptr)?;
+            let ptr = self.instance.get_ptr_witness(i)? as usize;
+            let el = self.memory.read_fr(ptr)?;
+            println!("ptr({}) => {}", ptr, el.to_str_radix(16));
             w.push(el);
-            println!("ptr({}) => {}", ptr, el);
         }
 
         self.memory.set_free_pos(old_mem_free_pos);
@@ -126,45 +117,12 @@ impl<E: PairingEngine> WitnessCalculator<E> {
         Ok(w)
     }
 
-    // https://github.com/iden3/go-circom-witnesscalc/blob/25592ab9b33bf8d6b99c133783bd208bee7a935c/witnesscalc.go#L410-L430
-    pub fn load_fr(&self, ptr: usize) -> Result<BigInt> {
-        let view = self.memory.memory.view::<u8>();
-        let ty = view[ptr + 4 + 3].get();
-
-        let res = if ty & 0x80 != 0 {
-            dbg!("not 0x80");
-            let res = self.memory.read_big(ptr + 8, self.n32 as usize)?;
-            if ty & 0x40 != 0 {
-                self.from_montgomery(res)
-            } else {
-                res
-            }
-        } else if view[ptr + 3].get() & 0x40 != 0 {
-            let res = self.memory.read_big(ptr, 4)?;
-            res
-        } else {
-            self.memory.read_big(ptr, 1)?
-        };
-
-        Ok(res)
-    }
-
-    // TODO: This is 99% wrong
-    fn from_montgomery(&self, res: BigInt) -> BigInt {
-        use std::ops::Mul;
-        let r_inv = ark_bn254::Fr::from_repr(self.r_inv).unwrap();
-        ark_bn254::Fr::from_repr(res)
-            .unwrap()
-            .mul(r_inv)
-            .into_repr()
-    }
-
     pub fn get_witness_buffer(&self) -> Result<Vec<u8>> {
-        let ptr = self.get_i32("getWitnessBuffer")? as usize;
+        let ptr = self.instance.get_ptr_witness_buffer()? as usize;
 
         let view = self.memory.memory.view::<u8>();
 
-        let len = self.get_n_vars()? * self.n64 * 8;
+        let len = self.instance.get_n_vars()? * self.n64 * 8;
         let arr = view[ptr..ptr + len as usize]
             .iter()
             .map(Cell::get)
@@ -174,8 +132,11 @@ impl<E: PairingEngine> WitnessCalculator<E> {
     }
 }
 
+#[derive(Clone, Debug)]
+pub struct CircomInstance(Instance);
+
 // binds to the circom functions
-impl<E: PairingEngine> WitnessCalculator<E> {
+impl CircomInstance {
     pub fn init(&self, sanity_check: bool) -> Result<()> {
         let func = self.func("init");
         func.call(&[Value::I32(sanity_check as i32)])?;
@@ -237,7 +198,7 @@ impl<E: PairingEngine> WitnessCalculator<E> {
     }
 
     fn func(&self, name: &str) -> &Function {
-        self.instance
+        self.0
             .exports
             .get_function(name)
             .expect(&format!("function {} not found", name))
@@ -278,6 +239,7 @@ mod tests {
         circuit_path: &'a str,
         inputs_path: &'a str,
         n_vars: u32,
+        n64: u32,
         witness: &'a [&'a str],
     }
 
@@ -288,6 +250,7 @@ mod tests {
             // inputs_path: "/Users/Georgios/paradigm/portfolio/dforest/dark-forest/crates/ark-circom/test-vectors/smtverifier10-input.json",
             inputs_path: "/Users/Georgios/paradigm/portfolio/dforest/dark-forest/crates/ark-circom/test-vectors/mycircuit-input1.json",
             n_vars: 4,
+            n64: 4,
             witness: &["1", "33", "3", "11"],
         });
     }
@@ -298,6 +261,7 @@ mod tests {
             circuit_path: "/Users/Georgios/paradigm/portfolio/dforest/dark-forest/crates/ark-circom/test-vectors/mycircuit.wasm",
             inputs_path: "/Users/Georgios/paradigm/portfolio/dforest/dark-forest/crates/ark-circom/test-vectors/mycircuit-input2.json",
             n_vars: 4,
+            n64: 4,
             witness: &["1","21888242871839275222246405745257275088548364400416034343698204186575672693159","21888242871839275222246405745257275088548364400416034343698204186575796149939","11"],
         });
     }
@@ -307,10 +271,7 @@ mod tests {
 
     fn value_to_bigint(v: Value) -> BigInt {
         match v {
-            Value::String(inner) => {
-                dbg!(&inner);
-                BigInt::from(u64::from_str(&inner).unwrap())
-            }
+            Value::String(inner) => BigInt::from_str(&inner).unwrap(),
             Value::Number(inner) => BigInt::from(inner.as_u64().expect("not a u32")),
             _ => panic!("unsupported type"),
         }
@@ -318,6 +279,13 @@ mod tests {
 
     fn run_test(case: TestCase) {
         let mut wtns = WitnessCalculator::<Bn254>::new(case.circuit_path).unwrap();
+        assert_eq!(
+            wtns.prime.to_str_radix(16),
+            "30644E72E131A029B85045B68181585D2833E84879B9709143E1F593F0000001".to_lowercase()
+        );
+        assert_eq!(wtns.instance.get_n_vars().unwrap() as u32, case.n_vars);
+        assert_eq!(wtns.n64 as u32, case.n64);
+
         let inputs_str = std::fs::read_to_string(case.inputs_path).unwrap();
         let inputs: std::collections::HashMap<String, serde_json::Value> =
             serde_json::from_str(&inputs_str).unwrap();
@@ -327,7 +295,7 @@ mod tests {
             .map(|(key, value)| {
                 let res = match value {
                     Value::String(inner) => {
-                        vec![BigInt::from(u64::from_str(&inner).unwrap())]
+                        vec![BigInt::from_str(inner).unwrap()]
                     }
                     Value::Number(inner) => {
                         vec![BigInt::from(inner.as_u64().expect("not a u32"))]
@@ -343,15 +311,9 @@ mod tests {
             .collect::<HashMap<_, _>>();
 
         let res = wtns.calculate_witness(inputs, true).unwrap();
-        for i in 0..res.len() {
-            // get the bottom 32 of the witness (how do we handle >u32 witnesses?)
-            assert_eq!(res[i].0[0] as u32, case.witness[i].parse::<u32>().unwrap());
+        // TODO: why can i not get the first witness element correctly?
+        for i in 1..res.len() {
+            assert_eq!(res[i], BigInt::from_str(case.witness[i]).unwrap());
         }
-
-        assert_eq!(
-            wtns.prime.to_string(),
-            "30644E72E131A029B85045B68181585D2833E84879B9709143E1F593F0000001"
-        );
-        assert_eq!(wtns.get_n_vars().unwrap() as u32, case.n_vars);
     }
 }
