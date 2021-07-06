@@ -6,7 +6,7 @@ use wasmer::{Memory, MemoryView};
 use ark_bn254::FrParameters;
 use ark_ff::{BigInteger, BigInteger256, FpParameters, FromBytes, Zero};
 
-use num_bigint::{BigInt, BigUint, Sign};
+use num_bigint::{BigInt, BigUint};
 
 use color_eyre::Result;
 use std::{convert::TryFrom, ops::Deref};
@@ -17,6 +17,7 @@ pub struct SafeMem {
 
     short_max: BigInt,
     short_min: BigInt,
+    r_inv: BigInt,
     pub prime: BigInt,
     n32: usize,
 }
@@ -30,7 +31,7 @@ impl Deref for SafeMem {
 }
 
 impl SafeMem {
-    pub fn new(memory: Memory, n32: usize, prime: BigInt) -> Self {
+    pub fn new(memory: Memory, n32: usize, prime: BigInt, r_inv: BigInt) -> Self {
         let short_max = BigInt::from(0x8000_0000u64);
         let short_min = BigInt::from_biguint(
             num_bigint::Sign::NoSign,
@@ -43,6 +44,7 @@ impl SafeMem {
             short_min,
             prime,
             n32,
+            r_inv,
         }
     }
 
@@ -103,23 +105,24 @@ impl SafeMem {
     }
 
     // https://github.com/iden3/go-circom-witnesscalc/blob/25592ab9b33bf8d6b99c133783bd208bee7a935c/witnesscalc.go#L410-L430
-    // TODO: Figure out WTF all this parsing is for
     pub fn read_fr(&self, ptr: usize) -> Result<BigInt> {
         let view = self.memory.view::<u8>();
 
         let res = if view[ptr + 4 + 3].get() & 0x80 != 0 {
-            // handle big positive
-            // TODO: handle big negative?
-            let num = self.read_big(ptr + 8, self.n32)?;
+            let mut num = self.read_big(ptr + 8, self.n32)?;
+            if view[ptr + 4 + 3].get() & 0x40 != 0 {
+                num = (num * &self.r_inv) % &self.prime
+            }
             num
         } else if view[ptr + 3].get() & 0x40 != 0 {
-            let mut res = self.read_u32(ptr).into();
+            let mut num = self.read_u32(ptr).into();
             // handle small negative
-            res -= BigInt::from(0x100000000i64);
-            res
+            num -= BigInt::from(0x100000000i64);
+            num
         } else {
             // handle small positive
-            self.read_u32(ptr).into()
+            let num = self.read_u32(ptr).into();
+            num
         };
 
         Ok(res)
@@ -199,6 +202,10 @@ mod tests {
             2,
             BigInt::from_str(
                 "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+            )
+            .unwrap(),
+            BigInt::from_str(
+                "9915499612839321149637521777990102151350674507940716049588462388200839649614",
             )
             .unwrap(),
         )

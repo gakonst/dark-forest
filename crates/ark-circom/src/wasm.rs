@@ -51,7 +51,7 @@ impl WitnessCalculator {
             "9915499612839321149637521777990102151350674507940716049588462388200839649614",
         )
         .unwrap();
-        let mut memory = SafeMem::new(memory, n32 as usize, BigInt::zero());
+        let mut memory = SafeMem::new(memory, n32 as usize, BigInt::zero(), r_inv.clone());
         let ptr = instance.get_ptr_raw_prime()?;
         let prime = memory.read_big(ptr as usize, n32 as usize)?;
         let n64 = ((prime.bits() - 1) / 64 + 1) as i32;
@@ -84,7 +84,6 @@ impl WitnessCalculator {
             let (msb, lsb) = fnv(&name);
             self.instance
                 .get_signal_offset32(p_sig_offset, 0, msb, lsb)?;
-            println!("hash({}) = ({}, {})", name, msb, lsb);
 
             let sig_offset = self.memory.read_u32(p_sig_offset as usize) as usize;
 
@@ -100,7 +99,6 @@ impl WitnessCalculator {
         for i in 0..n_vars {
             let ptr = self.instance.get_ptr_witness(i)? as usize;
             let el = self.memory.read_fr(ptr)?;
-            println!("ptr({}) => {}", ptr, el.to_str_radix(16));
             w.push(el);
         }
 
@@ -222,10 +220,8 @@ mod runtime {
 
 #[cfg(test)]
 mod tests {
-    use ark_bn254::Bn254;
-    use std::{collections::HashMap, path::PathBuf};
-
     use super::*;
+    use std::{collections::HashMap, path::PathBuf};
 
     struct TestCase<'a> {
         circuit_path: &'a str,
@@ -360,7 +356,6 @@ mod tests {
             .collect::<HashMap<_, _>>();
 
         let res = wtns.calculate_witness(inputs, false).unwrap();
-        println!("{:?}", &res);
         for i in 0..res.len() {
             assert_eq!(res[i], BigInt::from_str(case.witness[i]).unwrap());
         }
