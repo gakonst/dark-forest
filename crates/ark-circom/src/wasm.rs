@@ -1,25 +1,18 @@
 use std::cell::Cell;
 
 use color_eyre::Result;
-use wasmer::{imports, Function, Instance, Memory, MemoryType, Module, Store, Value};
+use wasmer::{imports, Function, Instance, Memory, MemoryType, Module, Store};
 
 use num_traits::Zero;
 
+use crate::{fnv, CircomInstance, SafeMemory};
 use num_bigint::BigInt;
-use std::str::FromStr;
-
-use crate::{fnv, memory::SafeMem};
 
 #[derive(Clone, Debug)]
 pub struct WitnessCalculator {
     pub instance: CircomInstance,
-    pub memory: SafeMem,
-
-    pub n32: i32,
+    pub memory: SafeMemory,
     pub n64: i32,
-
-    pub prime: BigInt,
-    pub r_inv: BigInt,
 }
 
 impl WitnessCalculator {
@@ -43,26 +36,20 @@ impl WitnessCalculator {
                 "log" => runtime::log_component(&store),
             }
         };
-        let instance = CircomInstance(Instance::new(&module, &import_object)?);
+        let instance = CircomInstance::new(Instance::new(&module, &import_object)?);
 
         let n32 = (instance.get_fr_len()? >> 2) - 2;
 
-        let r_inv = BigInt::from_str(
-            "9915499612839321149637521777990102151350674507940716049588462388200839649614",
-        )
-        .unwrap();
-        let mut memory = SafeMem::new(memory, n32 as usize, BigInt::zero(), r_inv.clone());
+        let mut memory = SafeMemory::new(memory, n32 as usize, BigInt::zero());
+
         let ptr = instance.get_ptr_raw_prime()?;
         let prime = memory.read_big(ptr as usize, n32 as usize)?;
         let n64 = ((prime.bits() - 1) / 64 + 1) as i32;
-        memory.prime = prime.clone();
+        memory.prime = prime;
 
         Ok(WitnessCalculator {
             instance,
             memory,
-            n32,
-            prime,
-            r_inv,
             n64,
         })
     }
@@ -122,85 +109,13 @@ impl WitnessCalculator {
     }
 }
 
-#[derive(Clone, Debug)]
-pub struct CircomInstance(Instance);
-
-// binds to the circom functions
-impl CircomInstance {
-    pub fn init(&self, sanity_check: bool) -> Result<()> {
-        let func = self.func("init");
-        func.call(&[Value::I32(sanity_check as i32)])?;
-        Ok(())
-    }
-
-    pub fn get_fr_len(&self) -> Result<i32> {
-        self.get_i32("getFrLen")
-    }
-
-    pub fn get_ptr_raw_prime(&self) -> Result<i32> {
-        self.get_i32("getPRawPrime")
-    }
-
-    pub fn get_n_vars(&self) -> Result<i32> {
-        self.get_i32("getNVars")
-    }
-
-    pub fn get_ptr_witness_buffer(&self) -> Result<i32> {
-        self.get_i32("getWitnessBuffer")
-    }
-
-    pub fn get_ptr_witness(&self, w: i32) -> Result<i32> {
-        let func = self.func("getPWitness");
-        let res = func.call(&[w.into()])?;
-
-        Ok(res[0].unwrap_i32())
-    }
-
-    pub fn get_signal_offset32(
-        &self,
-        p_sig_offset: u32,
-        component: u32,
-        hash_msb: u32,
-        hash_lsb: u32,
-    ) -> Result<()> {
-        let func = self.func("getSignalOffset32");
-        func.call(&[
-            p_sig_offset.into(),
-            component.into(),
-            hash_msb.into(),
-            hash_lsb.into(),
-        ])?;
-
-        Ok(())
-    }
-
-    pub fn set_signal(&self, c_idx: i32, component: i32, signal: i32, p_val: i32) -> Result<()> {
-        let func = self.func("setSignal");
-        func.call(&[c_idx.into(), component.into(), signal.into(), p_val.into()])?;
-
-        Ok(())
-    }
-
-    fn get_i32(&self, name: &str) -> Result<i32> {
-        let func = self.func(name);
-        let result = func.call(&[])?;
-        Ok(result[0].unwrap_i32())
-    }
-
-    fn func(&self, name: &str) -> &Function {
-        self.0
-            .exports
-            .get_function(name)
-            .expect(&format!("function {} not found", name))
-    }
-}
-
 // callback hooks for debugging
 mod runtime {
     use super::*;
 
     pub fn error(store: &Store) -> Function {
         #[allow(unused)]
+        #[allow(clippy::many_single_char_names)]
         fn func(a: i32, b: i32, c: i32, d: i32, e: i32, f: i32) {}
         Function::new_native(&store, func)
     }
@@ -325,7 +240,7 @@ mod tests {
     fn run_test(case: TestCase) {
         let mut wtns = WitnessCalculator::new(case.circuit_path).unwrap();
         assert_eq!(
-            wtns.prime.to_str_radix(16),
+            wtns.memory.prime.to_str_radix(16),
             "30644E72E131A029B85045B68181585D2833E84879B9709143E1F593F0000001".to_lowercase()
         );
         assert_eq!(wtns.instance.get_n_vars().unwrap() as u32, case.n_vars);
@@ -345,9 +260,7 @@ mod tests {
                     Value::Number(inner) => {
                         vec![BigInt::from(inner.as_u64().expect("not a u32"))]
                     }
-                    Value::Array(inner) => {
-                        inner.into_iter().cloned().map(value_to_bigint).collect()
-                    }
+                    Value::Array(inner) => inner.iter().cloned().map(value_to_bigint).collect(),
                     _ => panic!(),
                 };
 
@@ -356,8 +269,8 @@ mod tests {
             .collect::<HashMap<_, _>>();
 
         let res = wtns.calculate_witness(inputs, false).unwrap();
-        for i in 0..res.len() {
-            assert_eq!(res[i], BigInt::from_str(case.witness[i]).unwrap());
+        for (r, w) in res.iter().zip(case.witness) {
+            assert_eq!(r, &BigInt::from_str(w).unwrap());
         }
     }
 }

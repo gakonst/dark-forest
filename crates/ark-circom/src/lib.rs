@@ -69,14 +69,15 @@
 pub mod wasm;
 pub use wasm::WitnessCalculator;
 
-pub mod memory;
+mod memory;
+pub use memory::SafeMemory;
+
+mod circom;
+pub use circom::CircomInstance;
 
 use fnv::FnvHasher;
 use std::hash::Hasher;
 
-// use num_bigint::BigInt;
-// use ark_ec::PairingEngine;
-// use ark_ff::{BigInteger, /* BigInteger256 as BigInt, */ PrimeField};
 pub use num_bigint::BigInt;
 
 pub(crate) fn fnv(inp: &str) -> (u32, u32) {

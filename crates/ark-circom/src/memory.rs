@@ -9,20 +9,21 @@ use ark_ff::{BigInteger, BigInteger256, FpParameters, FromBytes, Zero};
 use num_bigint::{BigInt, BigUint};
 
 use color_eyre::Result;
+use std::str::FromStr;
 use std::{convert::TryFrom, ops::Deref};
 
 #[derive(Clone, Debug)]
-pub struct SafeMem {
+pub struct SafeMemory {
     pub memory: Memory,
+    pub prime: BigInt,
 
     short_max: BigInt,
     short_min: BigInt,
     r_inv: BigInt,
-    pub prime: BigInt,
     n32: usize,
 }
 
-impl Deref for SafeMem {
+impl Deref for SafeMemory {
     type Target = Memory;
 
     fn deref(&self) -> &Self::Target {
@@ -30,51 +31,60 @@ impl Deref for SafeMem {
     }
 }
 
-impl SafeMem {
-    pub fn new(memory: Memory, n32: usize, prime: BigInt, r_inv: BigInt) -> Self {
+impl SafeMemory {
+    /// Creates a new SafeMemory
+    pub fn new(memory: Memory, n32: usize, prime: BigInt) -> Self {
+        // TODO: Figure out a better way to calculate these
         let short_max = BigInt::from(0x8000_0000u64);
         let short_min = BigInt::from_biguint(
             num_bigint::Sign::NoSign,
             BigUint::try_from(FrParameters::MODULUS).unwrap(),
         ) - &short_max;
+        let r_inv = BigInt::from_str(
+            "9915499612839321149637521777990102151350674507940716049588462388200839649614",
+        )
+        .unwrap();
 
         Self {
             memory,
+            prime,
+
             short_max,
             short_min,
-            prime,
-            n32,
             r_inv,
+            n32,
         }
     }
 
+    /// Gets an immutable view to the memory in 32 byte chunks
     pub fn view(&self) -> MemoryView<u32> {
         self.memory.view()
     }
 
+    /// Returns the next free position in the memory
     pub fn free_pos(&self) -> u32 {
         self.view()[0].get()
     }
 
+    /// Sets the next free position in the memory
     pub fn set_free_pos(&mut self, ptr: u32) {
         self.write_u32(0, ptr);
     }
 
+    /// Allocates a U32 in memory
     pub fn alloc_u32(&mut self) -> u32 {
         let p = self.free_pos();
         self.set_free_pos(p + 8);
         p
     }
 
-    /// Writes a `num` to the provided position of the buffer
-    ///
-    /// This is marked as `&mut self` for safety
+    /// Writes a u32 to the specified memory offset
     pub fn write_u32(&mut self, ptr: usize, num: u32) {
         let buf = unsafe { self.memory.data_unchecked_mut() };
         buf[ptr..ptr + std::mem::size_of::<u32>()].copy_from_slice(&num.to_le_bytes());
     }
 
-    /// Reads a u32 from the specific slice
+    /// Reads a u32 from the specified memory offset
     pub fn read_u32(&self, ptr: usize) -> u32 {
         let buf = unsafe { self.memory.data_unchecked() };
 
@@ -84,12 +94,15 @@ impl SafeMem {
         u32::from_le_bytes(bytes)
     }
 
+    /// Allocates `self.n32 * 4 + 8` bytes in the memory
     pub fn alloc_fr(&mut self) -> u32 {
         let p = self.free_pos();
         self.set_free_pos(p + self.n32 as u32 * 4 + 8);
         p
     }
 
+    /// Writes a Field Element to memory at the specified offset, truncating
+    /// to smaller u32 types if needed and adjusting the sign via 2s complement
     pub fn write_fr(&mut self, ptr: usize, fr: &BigInt) -> Result<()> {
         if fr < &self.short_max && fr > &self.short_min {
             if fr >= &BigInt::zero() {
@@ -104,7 +117,7 @@ impl SafeMem {
         Ok(())
     }
 
-    // https://github.com/iden3/go-circom-witnesscalc/blob/25592ab9b33bf8d6b99c133783bd208bee7a935c/witnesscalc.go#L410-L430
+    /// Reads a Field Element from the memory at the specified offset
     pub fn read_fr(&self, ptr: usize) -> Result<BigInt> {
         let view = self.memory.view::<u8>();
 
@@ -120,9 +133,7 @@ impl SafeMem {
             num -= BigInt::from(0x100000000i64);
             num
         } else {
-            // handle small positive
-            let num = self.read_u32(ptr).into();
-            num
+            self.read_u32(ptr).into()
         };
 
         Ok(res)
@@ -171,6 +182,7 @@ impl SafeMem {
         Ok(())
     }
 
+    /// Reads `num_bytes * 32` from the specified memory offset in a Big Integer
     pub fn read_big(&self, ptr: usize, num_bytes: usize) -> Result<BigInt> {
         let buf = unsafe { self.memory.data_unchecked() };
         let buf = &buf[ptr..ptr + num_bytes * 32];
@@ -196,16 +208,12 @@ mod tests {
     use std::str::FromStr;
     use wasmer::{MemoryType, Store};
 
-    fn new() -> SafeMem {
-        SafeMem::new(
+    fn new() -> SafeMemory {
+        SafeMemory::new(
             Memory::new(&Store::default(), MemoryType::new(1, None, false)).unwrap(),
             2,
             BigInt::from_str(
                 "21888242871839275222246405745257275088548364400416034343698204186575808495617",
-            )
-            .unwrap(),
-            BigInt::from_str(
-                "9915499612839321149637521777990102151350674507940716049588462388200839649614",
             )
             .unwrap(),
         )
