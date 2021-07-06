@@ -5,7 +5,7 @@ use ark_relations::r1cs::{
 
 use super::r1cs_reader::R1CS;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CircomCircuit<E: PairingEngine> {
     pub r1cs: R1CS<E>,
     pub witness: Option<Vec<E::Fr>>,

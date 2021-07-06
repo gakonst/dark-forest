@@ -9,7 +9,7 @@ use ark_std::io::Read;
 
 use crate::circuit::{ConstraintSet, ConstraintVec};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct R1CS<E: PairingEngine> {
     pub num_inputs: usize,
     pub num_aux: usize,
