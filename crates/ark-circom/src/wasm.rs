@@ -285,6 +285,21 @@ mod tests {
     }
 
     #[test]
+    fn safe_multipler() {
+        let witness =
+            std::fs::read_to_string(&root_path("test-vectors/safe-circuit-witness.json")).unwrap();
+        let witness: Vec<String> = serde_json::from_str(&witness).unwrap();
+        let witness = &witness.iter().map(|x| x.as_ref()).collect::<Vec<_>>();
+        run_test(TestCase {
+            circuit_path: root_path("test-vectors/circuit2.wasm").as_str(),
+            inputs_path: root_path("test-vectors/mycircuit-input1.json").as_str(),
+            n_vars: 132, // 128 + 4
+            n64: 4,
+            witness,
+        });
+    }
+
+    #[test]
     fn smt_verifier() {
         let witness =
             std::fs::read_to_string(&root_path("test-vectors/smtverifier10-witness.json")).unwrap();
@@ -344,7 +359,8 @@ mod tests {
             })
             .collect::<HashMap<_, _>>();
 
-        let res = wtns.calculate_witness(inputs, true).unwrap();
+        let res = wtns.calculate_witness(inputs, false).unwrap();
+        println!("{:?}", &res);
         for i in 0..res.len() {
             assert_eq!(res[i], BigInt::from_str(case.witness[i]).unwrap());
         }

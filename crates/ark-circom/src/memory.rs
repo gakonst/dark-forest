@@ -83,9 +83,8 @@ impl SafeMem {
     }
 
     pub fn alloc_fr(&mut self) -> u32 {
-        let n32 = 8;
         let p = self.free_pos();
-        self.set_free_pos(p + n32 * 4 + 8);
+        self.set_free_pos(p + self.n32 as u32 * 4 + 8);
         p
     }
 
