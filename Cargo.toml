@@ -6,4 +6,5 @@ members = [
     "./crates/df-engine",
     "./crates/dark-forest",
     "./crates/df-cli",
+    "./crates/ark-circom"
 ]
