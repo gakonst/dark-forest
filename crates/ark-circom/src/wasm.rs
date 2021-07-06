@@ -247,7 +247,6 @@ mod tests {
     fn multiplier_1() {
         run_test(TestCase {
             circuit_path: "/Users/Georgios/paradigm/portfolio/dforest/dark-forest/crates/ark-circom/test-vectors/mycircuit.wasm",
-            // inputs_path: "/Users/Georgios/paradigm/portfolio/dforest/dark-forest/crates/ark-circom/test-vectors/smtverifier10-input.json",
             inputs_path: "/Users/Georgios/paradigm/portfolio/dforest/dark-forest/crates/ark-circom/test-vectors/mycircuit-input1.json",
             n_vars: 4,
             n64: 4,
@@ -263,6 +262,17 @@ mod tests {
             n_vars: 4,
             n64: 4,
             witness: &["1","21888242871839275222246405745257275088548364400416034343698204186575672693159","21888242871839275222246405745257275088548364400416034343698204186575796149939","11"],
+        });
+    }
+
+    #[test]
+    fn multiplier_3() {
+        run_test(TestCase {
+            circuit_path: "/Users/Georgios/paradigm/portfolio/dforest/dark-forest/crates/ark-circom/test-vectors/mycircuit.wasm",
+            inputs_path: "/Users/Georgios/paradigm/portfolio/dforest/dark-forest/crates/ark-circom/test-vectors/mycircuit-input3.json",
+            n_vars: 4,
+            n64: 4,
+            witness: &["1","21888242871839275222246405745257275088548364400416034343698204186575808493616","10944121435919637611123202872628637544274182200208017171849102093287904246808","2"],
         });
     }
 
@@ -311,8 +321,7 @@ mod tests {
             .collect::<HashMap<_, _>>();
 
         let res = wtns.calculate_witness(inputs, true).unwrap();
-        // TODO: why can i not get the first witness element correctly?
-        for i in 1..res.len() {
+        for i in 0..res.len() {
             assert_eq!(res[i], BigInt::from_str(case.witness[i]).unwrap());
         }
     }
