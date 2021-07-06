@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use ark_circom::WitnessCalculator;
 use color_eyre::Result;
-use ethers_core::types::U256;
 
 use ark_bn254::Bn254;
 

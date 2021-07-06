@@ -1,3 +1,4 @@
+//! Safe-ish interface for reading and writing specific types to the WASM runtime's memory
 use wasmer::{Memory, MemoryView};
 
 // TODO: Decide whether we want Ark here or if it should use a generic BigInt package
@@ -135,5 +136,61 @@ impl SafeMem {
         self.write_u32(ptr + 4, i32::MIN as u32);
         self.write_big(ptr + 8, fr)?;
         Ok(())
+    }
+}
+
+// TODO: Figure out how to read / write numbers > u32
+// circom-witness-calculator: Wasm + Memory -> expose BigInts so that they can be consumed by any proof system
+// ark-circom:
+// 1. can read zkey
+// 2. can generate witness from inputs
+// 3. can generate proofs
+// 4. can serialize proofs in the desired format
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use wasmer::{MemoryType, Store};
+
+    fn new() -> SafeMem {
+        SafeMem::new(Memory::new(&Store::default(), MemoryType::new(1, None, false)).unwrap())
+    }
+
+    #[test]
+    fn read_write_32() {
+        let mut mem = new();
+        let num = u32::MAX;
+
+        let inp = mem.read_u32(0);
+        assert_eq!(inp, 0);
+
+
+        mem.write_u32(0, num);
+        let inp = mem.read_u32(0);
+        assert_eq!(inp, num);
+    }
+
+    #[test]
+    fn read_write_short_positive_bigint() {
+        let mut mem = new();
+        let num = u32::MAX;
+
+        let inp = mem.read_u32(0);
+        assert_eq!(inp, 0);
+
+
+        mem.write_u32(0, num);
+        let inp = mem.read_u32(0);
+        assert_eq!(inp, num);
+
+    }
+
+    #[test]
+    fn read_write_short_negative_bigint() {
+
+    }
+
+    #[test]
+    fn read_write_long_normal_bigint() {
+
     }
 }
