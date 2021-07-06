@@ -1,14 +1,9 @@
 use std::cell::Cell;
-use std::marker::PhantomData;
 
 use color_eyre::Result;
-use wasmer::{imports, Function, Instance, Memory, MemoryType, MemoryView, Module, Store, Value};
+use wasmer::{imports, Function, Instance, Memory, MemoryType, Module, Store, Value};
 
-use num_traits::{One, ToPrimitive, Zero};
-
-use ark_ec::PairingEngine;
-use ark_ff::FromBytes;
-use ark_ff::{BigInteger, PrimeField};
+use num_traits::Zero;
 
 use num_bigint::BigInt;
 use std::str::FromStr;
@@ -16,7 +11,7 @@ use std::str::FromStr;
 use crate::{fnv, memory::SafeMem};
 
 #[derive(Clone, Debug)]
-pub struct WitnessCalculator<E: PairingEngine> {
+pub struct WitnessCalculator {
     pub instance: CircomInstance,
     pub memory: SafeMem,
 
@@ -25,11 +20,9 @@ pub struct WitnessCalculator<E: PairingEngine> {
 
     pub prime: BigInt,
     pub r_inv: BigInt,
-
-    engine: PhantomData<E>,
 }
 
-impl<E: PairingEngine> WitnessCalculator<E> {
+impl WitnessCalculator {
     pub fn new(path: impl AsRef<std::path::Path>) -> Result<Self> {
         let store = Store::default();
         let module = Module::from_file(&store, path)?;
@@ -68,7 +61,6 @@ impl<E: PairingEngine> WitnessCalculator<E> {
             instance,
             memory,
             n32,
-            engine: PhantomData,
             prime,
             r_inv,
             n64,
@@ -288,7 +280,7 @@ mod tests {
     }
 
     fn run_test(case: TestCase) {
-        let mut wtns = WitnessCalculator::<Bn254>::new(case.circuit_path).unwrap();
+        let mut wtns = WitnessCalculator::new(case.circuit_path).unwrap();
         assert_eq!(
             wtns.prime.to_str_radix(16),
             "30644E72E131A029B85045B68181585D2833E84879B9709143E1F593F0000001".to_lowercase()
