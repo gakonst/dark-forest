@@ -3,7 +3,7 @@ use ethers::providers::{Http, Provider};
 use std::{collections::HashMap, convert::TryFrom, path::PathBuf, sync::Arc};
 use structopt::StructOpt;
 
-use dark_forest::{engine::Contracts, types::Map, contracts::Network};
+use dark_forest::{contracts::Network, engine::Contracts, types::Map};
 
 #[derive(Debug, StructOpt)]
 struct Opts {
