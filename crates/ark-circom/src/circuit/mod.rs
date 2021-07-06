@@ -2,6 +2,8 @@ use ark_ec::PairingEngine;
 
 pub mod r1cs_reader;
 
+pub mod circom;
+
 pub type ConstraintSet<E> = (
     Vec<(usize, <E as PairingEngine>::Fr)>,
     Vec<(usize, <E as PairingEngine>::Fr)>,

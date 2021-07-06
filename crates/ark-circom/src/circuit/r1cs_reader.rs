@@ -4,11 +4,34 @@ use byteorder::{LittleEndian, ReadBytesExt};
 use std::io::{Error, ErrorKind, Result};
 
 use ark_ec::PairingEngine;
-use ark_ff::{BigInteger, Field, FromBytes, PrimeField};
+use ark_ff::FromBytes;
 use ark_std::io::Read;
-use num_traits::Zero;
 
 use crate::circuit::{ConstraintSet, ConstraintVec};
+
+#[derive(Clone)]
+pub struct R1CS<E: PairingEngine> {
+    pub num_inputs: usize,
+    pub num_aux: usize,
+    pub num_variables: usize,
+    pub constraints: Vec<ConstraintSet<E>>,
+    pub wire_mapping: Option<Vec<usize>>,
+}
+
+impl<E: PairingEngine> From<R1CSFile<E>> for R1CS<E> {
+    fn from(file: R1CSFile<E>) -> Self {
+        let num_inputs = (1 + file.header.n_pub_in + file.header.n_pub_out) as usize;
+        let num_variables = file.header.n_wires as usize;
+        let num_aux = num_variables - num_inputs;
+        R1CS {
+            num_aux,
+            num_inputs,
+            num_variables,
+            constraints: file.constraints,
+            wire_mapping: Some(file.wire_mapping.iter().map(|e| *e as usize).collect()),
+        }
+    }
+}
 
 pub struct R1CSFile<E: PairingEngine> {
     pub version: u32,
@@ -31,19 +54,19 @@ impl<E: PairingEngine> R1CSFile<E> {
             return Err(Error::new(ErrorKind::InvalidData, "Unsupported version"));
         }
 
-        let num_sections = reader.read_u32::<LittleEndian>()?;
+        let _num_sections = reader.read_u32::<LittleEndian>()?;
 
         // todo: rewrite this to support different section order and unknown sections
         // todo: handle sec_size correctly
-        let sec_type = reader.read_u32::<LittleEndian>()?;
+        let _sec_type = reader.read_u32::<LittleEndian>()?;
         let sec_size = reader.read_u64::<LittleEndian>()?;
 
         let header = Header::new(&mut reader, sec_size)?;
-        let sec_type = reader.read_u32::<LittleEndian>()?;
-        let sec_size = reader.read_u64::<LittleEndian>()?;
-        let constraints = read_constraints::<&mut R, E>(&mut reader, sec_size, &header)?;
+        let _sec_type = reader.read_u32::<LittleEndian>()?;
+        let _sec_size = reader.read_u64::<LittleEndian>()?;
+        let constraints = read_constraints::<&mut R, E>(&mut reader, &header)?;
 
-        let sec_type = reader.read_u32::<LittleEndian>()?;
+        let _sec_type = reader.read_u32::<LittleEndian>()?;
         let sec_size = reader.read_u64::<LittleEndian>()?;
         let wire_mapping = read_map(&mut reader, sec_size, &header)?;
 
@@ -110,10 +133,7 @@ impl Header {
     }
 }
 
-fn read_constraint_vec<R: Read, E: PairingEngine>(
-    mut reader: R,
-    header: &Header,
-) -> Result<ConstraintVec<E>> {
+fn read_constraint_vec<R: Read, E: PairingEngine>(mut reader: R) -> Result<ConstraintVec<E>> {
     let n_vec = reader.read_u32::<LittleEndian>()? as usize;
     let mut vec = Vec::with_capacity(n_vec);
     for _ in 0..n_vec {
@@ -127,16 +147,15 @@ fn read_constraint_vec<R: Read, E: PairingEngine>(
 
 fn read_constraints<R: Read, E: PairingEngine>(
     mut reader: R,
-    size: u64,
     header: &Header,
 ) -> Result<Vec<ConstraintSet<E>>> {
     // todo check section size
     let mut vec = Vec::with_capacity(header.n_constraints as usize);
     for _ in 0..header.n_constraints {
         vec.push((
-            read_constraint_vec::<&mut R, E>(&mut reader, &header)?,
-            read_constraint_vec::<&mut R, E>(&mut reader, &header)?,
-            read_constraint_vec::<&mut R, E>(&mut reader, &header)?,
+            read_constraint_vec::<&mut R, E>(&mut reader)?,
+            read_constraint_vec::<&mut R, E>(&mut reader)?,
+            read_constraint_vec::<&mut R, E>(&mut reader)?,
         ));
     }
     Ok(vec)
