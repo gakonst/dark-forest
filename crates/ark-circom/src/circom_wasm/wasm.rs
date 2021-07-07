@@ -1,12 +1,10 @@
-use std::cell::Cell;
-
 use color_eyre::Result;
+use num_bigint::BigInt;
+use num_traits::Zero;
+use std::cell::Cell;
 use wasmer::{imports, Function, Instance, Memory, MemoryType, Module, Store};
 
-use num_traits::Zero;
-
-use crate::{fnv, CircomInstance, SafeMemory};
-use num_bigint::BigInt;
+use super::{fnv, CircomInstance, SafeMemory};
 
 #[derive(Clone, Debug)]
 pub struct WitnessCalculator {
