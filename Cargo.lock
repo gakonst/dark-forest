@@ -117,12 +117,14 @@ dependencies = [
  "ark-std",
  "byteorder",
  "color-eyre",
+ "ethers",
  "fnv",
  "hex",
  "hex-literal",
  "num-bigint",
  "num-traits",
  "serde_json",
+ "tokio",
  "wasmer",
 ]
 
