@@ -4,15 +4,16 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
+# WASM operations
 wasmer = "1.0.1"
-wasmer-runtime = "0.17.1"
-
 fnv = "1.0.3"
+num-traits = "0.2.0"
+num-bigint = { version = "0.4", features = ["rand"] }
+
 
 color-eyre = "0.5"
 
-ethers-core = { git = "https://github.com/gakonst/ethers-rs" }
-
+# ZKP Generation
 ark-ec = "0.3.0"
 ark-ff = "0.3.0"
 ark-std = "0.3.0"
@@ -21,13 +22,9 @@ ark-r1cs-std = "0.3.0"
 ark-groth16 = "0.3.0"
 ark-relations = "0.3.0"
 
-num-traits = "0.2.0"
-num-bigint = { version = "0.4", features = ["rand"] }
-
 hex = "0.4.3"
-serde = "1.0.126"
-serde_json = "1.0.64"
 byteorder = "1.4.3"
 
 [dev-dependencies]
 hex-literal = "0.2.1"
+serde_json = "1.0.64"
