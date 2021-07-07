@@ -7,14 +7,14 @@ use ark_ec::PairingEngine;
 use ark_ff::FromBytes;
 use ark_std::io::Read;
 
-use crate::circuit::{ConstraintSet, ConstraintVec};
+use crate::circuit::{ConstraintVec, Constraints};
 
 #[derive(Clone, Debug)]
 pub struct R1CS<E: PairingEngine> {
     pub num_inputs: usize,
     pub num_aux: usize,
     pub num_variables: usize,
-    pub constraints: Vec<ConstraintSet<E>>,
+    pub constraints: Vec<Constraints<E>>,
     pub wire_mapping: Option<Vec<usize>>,
 }
 
@@ -36,7 +36,7 @@ impl<E: PairingEngine> From<R1CSFile<E>> for R1CS<E> {
 pub struct R1CSFile<E: PairingEngine> {
     pub version: u32,
     pub header: Header,
-    pub constraints: Vec<ConstraintSet<E>>,
+    pub constraints: Vec<Constraints<E>>,
     pub wire_mapping: Vec<u64>,
 }
 
@@ -148,7 +148,7 @@ fn read_constraint_vec<R: Read, E: PairingEngine>(mut reader: R) -> Result<Const
 fn read_constraints<R: Read, E: PairingEngine>(
     mut reader: R,
     header: &Header,
-) -> Result<Vec<ConstraintSet<E>>> {
+) -> Result<Vec<Constraints<E>>> {
     // todo check section size
     let mut vec = Vec::with_capacity(header.n_constraints as usize);
     for _ in 0..header.n_constraints {

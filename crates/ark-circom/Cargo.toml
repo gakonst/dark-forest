@@ -20,6 +20,7 @@ ark-bn254 = "0.3.0"
 ark-r1cs-std = "0.3.0"
 ark-groth16 = "0.3.0"
 ark-relations = "0.3.0"
+
 num-traits = "0.2.0"
 num-bigint = { version = "0.4", features = ["rand"] }
 
