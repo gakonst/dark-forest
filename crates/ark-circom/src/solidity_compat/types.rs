@@ -37,7 +37,7 @@ impl From<G1> for G1Affine {
 type G1Tup = (U256, U256);
 
 impl G1 {
-    fn as_tuple(&self) -> (U256, U256) {
+    pub fn as_tuple(&self) -> (U256, U256) {
         (self.x, self.y)
     }
 }
@@ -74,8 +74,8 @@ impl From<G2> for G2Affine {
 type G2Tup = ([U256; 2], [U256; 2]);
 
 impl G2 {
-    fn as_tuple(&self) -> G2Tup {
-        ([self.x[0], self.x[1]], [self.y[0], self.y[1]])
+    pub fn as_tuple(&self) -> G2Tup {
+        ([self.x[1], self.x[0]], [self.y[1], self.y[0]])
     }
 }
 
@@ -123,11 +123,11 @@ impl From<Proof> for ark_groth16::Proof<Bn254> {
 
 #[derive(Default, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct VerifyingKey {
-    alpha1: G1,
-    beta2: G2,
-    gamma2: G2,
-    delta2: G2,
-    ic: Vec<G1>,
+    pub alpha1: G1,
+    pub beta2: G2,
+    pub gamma2: G2,
+    pub delta2: G2,
+    pub ic: Vec<G1>,
 }
 
 impl VerifyingKey {
