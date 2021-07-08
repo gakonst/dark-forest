@@ -9,14 +9,7 @@ pub struct Inputs(pub Vec<U256>);
 
 impl From<&[Fr]> for Inputs {
     fn from(src: &[Fr]) -> Self {
-        let els = src
-            .iter()
-            .map(|point| {
-                let point = point.into_repr();
-                let point_bytes = point.to_bytes_le();
-                U256::from(&point_bytes[..])
-            })
-            .collect();
+        let els = src.iter().map(|point| point_to_u256(*point)).collect();
 
         Self(els)
     }
