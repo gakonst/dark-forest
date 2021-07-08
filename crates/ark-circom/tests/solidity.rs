@@ -34,36 +34,36 @@ async fn solidity_verifier() -> Result<()> {
 
     let proof = prove(circom, &params, &mut rng)?;
 
-    // launch the network
+    // launch the network & compile the verifier
     let (compiled, ganache) = compile_and_launch_ganache(
         Solc::new("./src/solidity_compat/verifier.sol"),
         Ganache::new(),
     )
     .await?;
-
     let acc = ganache.addresses()[0];
-
-    let contract = compiled
-        .get("TestVerifier")
-        .expect("could not find contract");
-
     let provider = Provider::<Http>::try_from(ganache.endpoint())?;
     let provider = provider.with_sender(acc);
     let provider = Arc::new(provider);
 
-    let factory = ContractFactory::new(
-        contract.abi.clone(),
-        contract.bytecode.clone(),
-        provider.clone(),
-    );
+    // deploy the verifier
+    let contract = {
+        let contract = compiled
+            .get("TestVerifier")
+            .expect("could not find contract");
 
-    let contract = factory.deploy(())?.send().await?;
-    let addr = contract.address();
+        let factory = ContractFactory::new(
+            contract.abi.clone(),
+            contract.bytecode.clone(),
+            provider.clone(),
+        );
+        let contract = factory.deploy(())?.send().await?;
+        let addr = contract.address();
+        Groth16Verifier::new(provider, addr)
+    };
 
-    let contract = Groth16Verifier::new(provider, addr);
-
+    // check the proof
     let verified = contract
-        .check_proof(params.vk, proof, inputs.as_slice())
+        .check_proof(proof, params.vk, inputs.as_slice())
         .await?;
     assert!(verified);
 
