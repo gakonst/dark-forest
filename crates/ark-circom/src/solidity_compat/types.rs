@@ -1,3 +1,5 @@
+//! Helpers for converting Arkworks types to U256-tuples as expected by the
+//! Solidity Groth16 Verifier smart contracts
 use ark_ff::{BigInteger, FromBytes, PrimeField};
 use ethers::types::U256;
 
@@ -74,6 +76,7 @@ impl From<G2> for G2Affine {
 type G2Tup = ([U256; 2], [U256; 2]);
 
 impl G2 {
+    // NB: Serialize the c1 limb first.
     pub fn as_tuple(&self) -> G2Tup {
         ([self.x[1], self.x[0]], [self.y[1], self.y[0]])
     }

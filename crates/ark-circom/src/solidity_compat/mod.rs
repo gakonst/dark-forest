@@ -9,10 +9,10 @@ use ethers::{
 
 use std::sync::Arc;
 
-// TODO, make this something else? Make it test only? Read it from an ABI file?
 abigen!(
     Verifier,
-    r#"[{"inputs":[{"internalType":"uint256[]","name":"input","type":"uint256[]"},{"components":[{"components":[{"internalType":"uint256","name":"X","type":"uint256"},{"internalType":"uint256","name":"Y","type":"uint256"}],"internalType":"struct Pairing.G1Point","name":"A","type":"tuple"},{"components":[{"internalType":"uint256[2]","name":"X","type":"uint256[2]"},{"internalType":"uint256[2]","name":"Y","type":"uint256[2]"}],"internalType":"struct Pairing.G2Point","name":"B","type":"tuple"},{"components":[{"internalType":"uint256","name":"X","type":"uint256"},{"internalType":"uint256","name":"Y","type":"uint256"}],"internalType":"struct Pairing.G1Point","name":"C","type":"tuple"}],"internalType":"struct Verifier.Proof","name":"proof","type":"tuple"},{"components":[{"components":[{"internalType":"uint256","name":"X","type":"uint256"},{"internalType":"uint256","name":"Y","type":"uint256"}],"internalType":"struct Pairing.G1Point","name":"alfa1","type":"tuple"},{"components":[{"internalType":"uint256[2]","name":"X","type":"uint256[2]"},{"internalType":"uint256[2]","name":"Y","type":"uint256[2]"}],"internalType":"struct Pairing.G2Point","name":"beta2","type":"tuple"},{"components":[{"internalType":"uint256[2]","name":"X","type":"uint256[2]"},{"internalType":"uint256[2]","name":"Y","type":"uint256[2]"}],"internalType":"struct Pairing.G2Point","name":"gamma2","type":"tuple"},{"components":[{"internalType":"uint256[2]","name":"X","type":"uint256[2]"},{"internalType":"uint256[2]","name":"Y","type":"uint256[2]"}],"internalType":"struct Pairing.G2Point","name":"delta2","type":"tuple"},{"components":[{"internalType":"uint256","name":"X","type":"uint256"},{"internalType":"uint256","name":"Y","type":"uint256"}],"internalType":"struct Pairing.G1Point[]","name":"IC","type":"tuple[]"}],"internalType":"struct Verifier.VerifyingKey","name":"vk","type":"tuple"}],"name":"verify","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"}]"#,
+    r#"[{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"uint256[]","name":"input","type":"uint256[]"},{"components":[{"components":[{"internalType":"uint256","name":"X","type":"uint256"},{"internalType":"uint256","name":"Y","type":"uint256"}],"internalType":"struct Pairing.G1Point","name":"A","type":"tuple"},{"components":[{"internalType":"uint256[2]","name":"X","type":"uint256[2]"},{"internalType":"uint256[2]","name":"Y","type":"uint256[2]"}],"internalType":"struct Pairing.G2Point","name":"B","type":"tuple"},{"components":[{"internalType":"uint256","name":"X","type":"uint256"},{"internalType":"uint256","name":"Y","type":"uint256"}],"internalType":"struct Pairing.G1Point","name":"C","type":"tuple"}],"internalType":"struct Verifier.Proof","name":"proof","type":"tuple"},{"components":[{"components":[{"internalType":"uint256","name":"X","type":"uint256"},{"internalType":"uint256","name":"Y","type":"uint256"}],"internalType":"struct Pairing.G1Point","name":"alfa1","type":"tuple"},{"components":[{"internalType":"uint256[2]","name":"X","type":"uint256[2]"},{"internalType":"uint256[2]","name":"Y","type":"uint256[2]"}],"internalType":"struct Pairing.G2Point","name":"beta2","type":"tuple"},{"components":[{"internalType":"uint256[2]","name":"X","type":"uint256[2]"},{"internalType":"uint256[2]","name":"Y","type":"uint256[2]"}],"internalType":"struct Pairing.G2Point","name":"gamma2","type":"tuple"},{"components":[{"internalType":"uint256[2]","name":"X","type":"uint256[2]"},{"internalType":"uint256[2]","name":"Y","type":"uint256[2]"}],"internalType":"struct Pairing.G2Point","name":"delta2","type":"tuple"},{"components":[{"internalType":"uint256","name":"X","type":"uint256"},{"internalType":"uint256","name":"Y","type":"uint256"}],"internalType":"struct Pairing.G1Point[]","name":"IC","type":"tuple[]"}],"internalType":"struct Verifier.VerifyingKey","name":"vk","type":"tuple"}],"name":"verify","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"}]
+"#,
 );
 
 pub struct Groth16Verifier<M> {
@@ -26,17 +26,21 @@ impl<M: Middleware> Groth16Verifier<M> {
         }
     }
 
+    /// Checks the provided proof & inputs against the verifying key
     pub async fn check_proof<I: Into<Inputs>, P: Into<Proof>, VK: Into<VerifyingKey>>(
         &self,
-        vk: VK,
         proof: P,
+        vk: VK,
         inputs: I,
     ) -> Result<bool, ContractError<M>> {
+        // convert into the expected format by the contract
         let proof = proof.into().as_tuple();
         let vk = vk.into().as_tuple();
         let inputs = inputs.into().0;
 
-        let ok = self.verifier.verify(inputs, proof, vk).call().await?;
-        Ok(ok)
+        // query the contract
+        let res = self.verifier.verify(inputs, proof, vk).call().await?;
+
+        Ok(res)
     }
 }

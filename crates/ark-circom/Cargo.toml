@@ -25,7 +25,6 @@ ark-relations = "0.3.0"
 hex = "0.4.3"
 byteorder = "1.4.3"
 
-# ethers = { path = "../../../../../ethers-rs/ethers", features = ["abigen"] }
 ethers = { git = "https://github.com/gakonst/ethers-rs", features = ["abigen"] }
 serde_json = "1.0.64"
 
