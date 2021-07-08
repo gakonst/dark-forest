@@ -72,5 +72,4 @@ pub use circom_wasm::WitnessCalculator;
 pub mod circuit;
 pub use circuit::{CircomBuilder, CircomCircuit, CircuitConfig};
 
-pub mod solidity_compat;
-pub use solidity_compat::Groth16Verifier;
+pub mod ethereum;
