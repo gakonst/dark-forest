@@ -296,25 +296,120 @@ fn deserialize_g2_vec(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ark_bn254::{G1Projective, G2Projective};
     use memmap::*;
+    use num_bigint::BigUint;
     use std::fs::File;
 
-    #[test]
-    fn snarkjs_g1() {
-        let buf = vec![
-            23, 14, 17, 42, 185, 164, 205, 1, 195, 107, 171, 71, 64, 46, 252, 207, 233, 238, 75,
-            26, 225, 17, 222, 60, 207, 94, 92, 15, 152, 2, 235, 6, 30, 139, 14, 214, 223, 44, 75,
-            49, 54, 176, 41, 90, 23, 66, 228, 60, 120, 2, 126, 203, 170, 53, 127, 17, 146, 101, 59,
-            78, 218, 81, 70, 6,
-        ];
+    use crate::{CircomBuilder, CircuitConfig};
+    use ark_groth16::{create_random_proof as prove, prepare_verifying_key, verify_proof};
+    use ark_std::rand::thread_rng;
+    use num_traits::{One, Zero};
+    use std::str::FromStr;
 
-        // converts from montgomery to normal
-        let bigint = BigInteger256::deserialize(&buf[..32]).unwrap();
-        let f = Fq::new(bigint);
+    use std::convert::TryFrom;
+
+    fn fq_from_str(s: &str) -> Fq {
+        BigInteger256::try_from(BigUint::from_str(s).unwrap())
+            .unwrap()
+            .into()
     }
 
     #[test]
-    fn deser() {
+    fn can_deser_fq() {
+        // Circom snarkjs code:
+        // console.log(curve.G1.F.one)
+        let buf = vec![
+            157, 13, 143, 197, 141, 67, 93, 211, 61, 11, 199, 245, 40, 235, 120, 10, 44, 70, 121,
+            120, 111, 163, 110, 102, 47, 223, 7, 154, 193, 119, 10, 14,
+        ];
+
+        let fq = deserialize_field(&mut &buf[..]).unwrap();
+        assert_eq!(fq, Fq::one());
+    }
+
+    #[test]
+    fn can_deser_g1() {
+        // Circom snarkjs code:
+        // const buff = new Uint8Array(curve.G1.F.n8*2);
+        // curve.G1.toRprLEM(buff, 0, curve.G1.one);
+        // console.dir( buff, { 'maxArrayLength': null })
+        let buf = vec![
+            157, 13, 143, 197, 141, 67, 93, 211, 61, 11, 199, 245, 40, 235, 120, 10, 44, 70, 121,
+            120, 111, 163, 110, 102, 47, 223, 7, 154, 193, 119, 10, 14, 58, 27, 30, 139, 27, 135,
+            186, 166, 123, 22, 142, 235, 81, 214, 241, 20, 88, 140, 242, 240, 222, 70, 221, 204,
+            94, 190, 15, 52, 131, 239, 20, 28,
+        ];
+        let g1 = deserialize_g1(&mut &buf[..]).unwrap();
+
+        // Circom logs in Projective coordinates: console.log(curve.G1.one)
+        let expected = {
+            let x = Fq::one();
+            let y = Fq::one() + Fq::one();
+            let z = Fq::one();
+            G1Affine::from(G1Projective::new(x, y, z))
+        };
+        assert_eq!(g1, expected);
+    }
+
+    #[test]
+    fn can_deser_g2() {
+        // Circom snarkjs code:
+        // const buff = new Uint8Array(curve.G2.F.n8*2);
+        // curve.G2.toRprLEM(buff, 0, curve.G2.one);
+        // console.dir( buff, { 'maxArrayLength': null })
+        let buf = vec![
+            38, 32, 188, 2, 209, 181, 131, 142, 114, 1, 123, 73, 53, 25, 235, 220, 223, 26, 129,
+            151, 71, 38, 184, 251, 59, 80, 150, 175, 65, 56, 87, 25, 64, 97, 76, 168, 125, 115,
+            180, 175, 196, 216, 2, 88, 90, 221, 67, 96, 134, 47, 160, 82, 252, 80, 233, 9, 107,
+            123, 234, 58, 131, 240, 254, 20, 246, 233, 107, 136, 157, 250, 157, 97, 120, 155, 158,
+            245, 151, 210, 127, 254, 254, 125, 27, 35, 98, 26, 158, 255, 6, 66, 158, 174, 235, 126,
+            253, 40, 238, 86, 24, 199, 86, 91, 9, 100, 187, 60, 125, 50, 34, 249, 87, 220, 118, 16,
+            53, 51, 190, 53, 249, 85, 130, 100, 253, 147, 230, 160, 164, 13,
+        ];
+        let g2 = deserialize_g2(&mut &buf[..]).unwrap();
+
+        // Circom logs in Projective coordinates: console.log(curve.G2.one)
+        let expected = {
+            let x = Fq2::new(
+                fq_from_str(
+                    "10857046999023057135944570762232829481370756359578518086990519993285655852781",
+                ),
+                fq_from_str(
+                    "11559732032986387107991004021392285783925812861821192530917403151452391805634",
+                ),
+            );
+
+            let y = Fq2::new(
+                fq_from_str(
+                    "8495653923123431417604973247489272438418190587263600148770280649306958101930",
+                ),
+                fq_from_str(
+                    "4082367875863433681332203403145435568316851327593401208105741076214120093531",
+                ),
+            );
+            let z = Fq2::new(Fq::one(), Fq::zero());
+            G2Affine::from(G2Projective::new(x, y, z))
+        };
+        assert_eq!(g2, expected);
+    }
+
+    #[test]
+    fn header() {
+        // `circom --r1cs` using the below file:
+        //
+        //  template Multiplier() {
+        //     signal private input a;
+        //     signal private input b;
+        //     signal output c;
+        //
+        //     c <== a*b;
+        // }
+        //
+        // component main = Multiplier();
+        //
+        // Then:
+        // `snarkjs zkey new circuit.r1cs powersOfTau28_hez_final_10.ptau test.zkey`
         let path = "./test-vectors/test.zkey";
         let file = File::open(path).unwrap();
         let map = unsafe {
@@ -324,6 +419,12 @@ mod tests {
         };
         let mut reader = Cursor::new(map.as_ref());
         let mut binfile = BinFile::new(&mut reader).unwrap();
+        let header = binfile.groth_header().unwrap();
+        assert_eq!(header.n_vars, 4);
+        assert_eq!(header.n_public, 1);
+        assert_eq!(header.domain_size, 2);
+        assert_eq!(header.power, 2);
+    }
 
         let pk = binfile.proving_key().unwrap();
     }
