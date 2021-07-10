@@ -426,6 +426,42 @@ mod tests {
         assert_eq!(header.power, 2);
     }
 
-        let pk = binfile.proving_key().unwrap();
+    #[test]
+    fn verify_proof_with_zkey() {
+        let path = "./test-vectors/test.zkey";
+        let file = File::open(path).unwrap();
+        let map = unsafe {
+            MmapOptions::new()
+                .map(&file)
+                .expect("unable to create a memory map")
+        };
+        let mut reader = Cursor::new(map.as_ref());
+        let mut binfile = BinFile::new(&mut reader).unwrap();
+
+        let params = binfile.proving_key().unwrap();
+        dbg!(params.vk.gamma_abc_g1.len());
+
+        let cfg = CircuitConfig::<Bn254>::new(
+            "./test-vectors/mycircuit.wasm",
+            "./test-vectors/mycircuit.r1cs",
+        )
+        .unwrap();
+        let mut builder = CircomBuilder::new(cfg);
+        builder.push_input("a", 3);
+        builder.push_input("b", 11);
+
+        let circom = builder.build().unwrap();
+
+        let inputs = circom.get_public_inputs().unwrap();
+        dbg!(inputs.len());
+
+        let mut rng = thread_rng();
+        let proof = prove(circom, &params, &mut rng).unwrap();
+
+        let pvk = prepare_verifying_key(&params.vk);
+
+        let verified = verify_proof(&pvk, &proof, &inputs).unwrap();
+
+        assert!(verified);
     }
 }
