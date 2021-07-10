@@ -27,6 +27,10 @@ byteorder = "1.4.3"
 
 ethers = { git = "https://github.com/gakonst/ethers-rs", features = ["abigen"] }
 serde_json = "1.0.64"
+serde = "1.0.126"
+thiserror = "1.0.26"
+memmap = "0.7.0"
+ark-serialize = "0.3.0"
 
 [dev-dependencies]
 hex-literal = "0.2.1"
