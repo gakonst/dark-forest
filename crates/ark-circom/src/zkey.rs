@@ -37,6 +37,8 @@ use std::{
 
 use ark_bn254::{Bn254, Fq, Fq2, G1Affine, G2Affine};
 use ark_groth16::{ProvingKey, VerifyingKey};
+use ark_serialize::CanonicalSerialize;
+use num_traits::Zero;
 
 #[derive(Clone, Debug)]
 pub struct Section {
@@ -85,12 +87,13 @@ impl<'a> BinFile<'a> {
 
     pub fn proving_key(&mut self) -> IoResult<ProvingKey<Bn254>> {
         let header = self.groth_header()?;
+        dbg!(&header);
         let ic = self.ic(header.n_public)?;
 
         let a_query = self.a_query(header.n_vars)?;
         let b_g1_query = self.b_g1_query(header.n_vars)?;
         let b_g2_query = self.b_g2_query(header.n_vars)?;
-        let l_query = self.l_query(header.n_vars - header.n_public - 1)?;
+        let l_query = self.l_query(header.n_vars - header.n_public + 1)?;
         let h_query = self.h_query(header.domain_size as usize)?;
 
         let vk = VerifyingKey::<Bn254> {
@@ -153,12 +156,18 @@ impl<'a> BinFile<'a> {
 
     fn g1_section(&mut self, num: usize, section_id: usize) -> IoResult<Vec<G1Affine>> {
         let section = self.get_section(section_id as u32);
-        deserialize_g1_vec(&mut self.reader, &section, num as u32)
+        deserialize_g1_vec(
+            &self.reader.get_ref()[section.position as usize..],
+            num as u32,
+        )
     }
 
     fn g2_section(&mut self, num: usize, section_id: usize) -> IoResult<Vec<G2Affine>> {
         let section = self.get_section(section_id as u32);
-        deserialize_g2_vec(&mut self.reader, &section, num as u32)
+        deserialize_g2_vec(
+            &self.reader.get_ref()[section.position as usize..],
+            num as u32,
+        )
     }
 }
 
@@ -263,13 +272,8 @@ fn deserialize_g2<R: Read>(reader: &mut R) -> IoResult<G2Affine> {
     Ok(G2Affine::new(f1, f2, false))
 }
 
-fn deserialize_g1_vec(
-    reader: &mut Cursor<&[u8]>,
-    section: &Section,
-    n_vars: u32,
-) -> IoResult<Vec<G1Affine>> {
-    let size = 64;
-    let buf = &reader.get_ref()[section.position as usize..];
+fn deserialize_g1_vec(buf: &[u8], n_vars: u32) -> IoResult<Vec<G1Affine>> {
+    let size = G1Affine::zero().uncompressed_size();
     let mut v = vec![];
     for i in 0..n_vars as usize {
         let el = deserialize_g1(&mut &buf[i * size..(i + 1) * size])?;
@@ -278,13 +282,8 @@ fn deserialize_g1_vec(
     Ok(v)
 }
 
-fn deserialize_g2_vec(
-    reader: &mut Cursor<&[u8]>,
-    section: &Section,
-    n_vars: u32,
-) -> IoResult<Vec<G2Affine>> {
-    let size = 128;
-    let buf = &reader.get_ref()[section.position as usize..];
+fn deserialize_g2_vec(buf: &[u8], n_vars: u32) -> IoResult<Vec<G2Affine>> {
+    let size = G2Affine::zero().uncompressed_size();
     let mut v = vec![];
     for i in 0..n_vars as usize {
         let el = deserialize_g2(&mut &buf[i * size..(i + 1) * size])?;
@@ -315,50 +314,34 @@ mod tests {
             .into()
     }
 
-    #[test]
-    fn can_deser_fq() {
-        // Circom snarkjs code:
-        // console.log(curve.G1.F.one)
-        let buf = vec![
+    // Circom snarkjs code:
+    // console.log(curve.G1.F.one)
+    fn fq_buf() -> Vec<u8> {
+        vec![
             157, 13, 143, 197, 141, 67, 93, 211, 61, 11, 199, 245, 40, 235, 120, 10, 44, 70, 121,
             120, 111, 163, 110, 102, 47, 223, 7, 154, 193, 119, 10, 14,
-        ];
-
-        let fq = deserialize_field(&mut &buf[..]).unwrap();
-        assert_eq!(fq, Fq::one());
+        ]
     }
 
-    #[test]
-    fn can_deser_g1() {
-        // Circom snarkjs code:
-        // const buff = new Uint8Array(curve.G1.F.n8*2);
-        // curve.G1.toRprLEM(buff, 0, curve.G1.one);
-        // console.dir( buff, { 'maxArrayLength': null })
-        let buf = vec![
+    // Circom snarkjs code:
+    // const buff = new Uint8Array(curve.G1.F.n8*2);
+    // curve.G1.toRprLEM(buff, 0, curve.G1.one);
+    // console.dir( buff, { 'maxArrayLength': null })
+    fn g1_buf() -> Vec<u8> {
+        vec![
             157, 13, 143, 197, 141, 67, 93, 211, 61, 11, 199, 245, 40, 235, 120, 10, 44, 70, 121,
             120, 111, 163, 110, 102, 47, 223, 7, 154, 193, 119, 10, 14, 58, 27, 30, 139, 27, 135,
             186, 166, 123, 22, 142, 235, 81, 214, 241, 20, 88, 140, 242, 240, 222, 70, 221, 204,
             94, 190, 15, 52, 131, 239, 20, 28,
-        ];
-        let g1 = deserialize_g1(&mut &buf[..]).unwrap();
-
-        // Circom logs in Projective coordinates: console.log(curve.G1.one)
-        let expected = {
-            let x = Fq::one();
-            let y = Fq::one() + Fq::one();
-            let z = Fq::one();
-            G1Affine::from(G1Projective::new(x, y, z))
-        };
-        assert_eq!(g1, expected);
+        ]
     }
 
-    #[test]
-    fn can_deser_g2() {
-        // Circom snarkjs code:
-        // const buff = new Uint8Array(curve.G2.F.n8*2);
-        // curve.G2.toRprLEM(buff, 0, curve.G2.one);
-        // console.dir( buff, { 'maxArrayLength': null })
-        let buf = vec![
+    // Circom snarkjs code:
+    // const buff = new Uint8Array(curve.G2.F.n8*2);
+    // curve.G2.toRprLEM(buff, 0, curve.G2.one);
+    // console.dir( buff, { 'maxArrayLength': null })
+    fn g2_buf() -> Vec<u8> {
+        vec![
             38, 32, 188, 2, 209, 181, 131, 142, 114, 1, 123, 73, 53, 25, 235, 220, 223, 26, 129,
             151, 71, 38, 184, 251, 59, 80, 150, 175, 65, 56, 87, 25, 64, 97, 76, 168, 125, 115,
             180, 175, 196, 216, 2, 88, 90, 221, 67, 96, 134, 47, 160, 82, 252, 80, 233, 9, 107,
@@ -366,32 +349,92 @@ mod tests {
             245, 151, 210, 127, 254, 254, 125, 27, 35, 98, 26, 158, 255, 6, 66, 158, 174, 235, 126,
             253, 40, 238, 86, 24, 199, 86, 91, 9, 100, 187, 60, 125, 50, 34, 249, 87, 220, 118, 16,
             53, 51, 190, 53, 249, 85, 130, 100, 253, 147, 230, 160, 164, 13,
-        ];
+        ]
+    }
+
+    // Circom logs in Projective coordinates: console.log(curve.G1.one)
+    fn g1_one() -> G1Affine {
+        let x = Fq::one();
+        let y = Fq::one() + Fq::one();
+        let z = Fq::one();
+        G1Affine::from(G1Projective::new(x, y, z))
+    }
+
+    // Circom logs in Projective coordinates: console.log(curve.G2.one)
+    fn g2_one() -> G2Affine {
+        let x = Fq2::new(
+            fq_from_str(
+                "10857046999023057135944570762232829481370756359578518086990519993285655852781",
+            ),
+            fq_from_str(
+                "11559732032986387107991004021392285783925812861821192530917403151452391805634",
+            ),
+        );
+
+        let y = Fq2::new(
+            fq_from_str(
+                "8495653923123431417604973247489272438418190587263600148770280649306958101930",
+            ),
+            fq_from_str(
+                "4082367875863433681332203403145435568316851327593401208105741076214120093531",
+            ),
+        );
+        let z = Fq2::new(Fq::one(), Fq::zero());
+        G2Affine::from(G2Projective::new(x, y, z))
+    }
+
+    #[test]
+    fn can_deser_fq() {
+        let buf = fq_buf();
+        let fq = deserialize_field(&mut &buf[..]).unwrap();
+        assert_eq!(fq, Fq::one());
+    }
+
+    #[test]
+    fn can_deser_g1() {
+        let buf = g1_buf();
+        assert_eq!(buf.len(), 64);
+        let g1 = deserialize_g1(&mut &buf[..]).unwrap();
+        let expected = g1_one();
+        assert_eq!(g1, expected);
+    }
+
+    #[test]
+    fn can_deser_g1_vec() {
+        let n_vars = 10;
+        let buf = vec![g1_buf(); n_vars]
+            .iter()
+            .cloned()
+            .flatten()
+            .collect::<Vec<_>>();
+        let expected = vec![g1_one(); n_vars];
+
+        let de = deserialize_g1_vec(&buf[..], n_vars as u32).unwrap();
+        assert_eq!(expected, de);
+    }
+
+    #[test]
+    fn can_deser_g2() {
+        let buf = g2_buf();
+        assert_eq!(buf.len(), 128);
         let g2 = deserialize_g2(&mut &buf[..]).unwrap();
 
-        // Circom logs in Projective coordinates: console.log(curve.G2.one)
-        let expected = {
-            let x = Fq2::new(
-                fq_from_str(
-                    "10857046999023057135944570762232829481370756359578518086990519993285655852781",
-                ),
-                fq_from_str(
-                    "11559732032986387107991004021392285783925812861821192530917403151452391805634",
-                ),
-            );
-
-            let y = Fq2::new(
-                fq_from_str(
-                    "8495653923123431417604973247489272438418190587263600148770280649306958101930",
-                ),
-                fq_from_str(
-                    "4082367875863433681332203403145435568316851327593401208105741076214120093531",
-                ),
-            );
-            let z = Fq2::new(Fq::one(), Fq::zero());
-            G2Affine::from(G2Projective::new(x, y, z))
-        };
+        let expected = g2_one();
         assert_eq!(g2, expected);
+    }
+
+    #[test]
+    fn can_deser_g2_vec() {
+        let n_vars = 10;
+        let buf = vec![g2_buf(); n_vars]
+            .iter()
+            .cloned()
+            .flatten()
+            .collect::<Vec<_>>();
+        let expected = vec![g2_one(); n_vars];
+
+        let de = deserialize_g2_vec(&buf[..], n_vars as u32).unwrap();
+        assert_eq!(expected, de);
     }
 
     #[test]
