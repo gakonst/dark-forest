@@ -38,7 +38,7 @@ use std::{
 use ark_bn254::{Bn254, Fq, Fq2, G1Affine, G2Affine};
 use ark_groth16::{ProvingKey, VerifyingKey};
 use ark_serialize::CanonicalSerialize;
-use num_traits::Zero;
+use num_traits::{Zero, One};
 
 #[derive(Clone, Debug)]
 pub struct Section {
@@ -93,7 +93,8 @@ impl<'a> BinFile<'a> {
         let a_query = self.a_query(header.n_vars)?;
         let b_g1_query = self.b_g1_query(header.n_vars)?;
         let b_g2_query = self.b_g2_query(header.n_vars)?;
-        let l_query = self.l_query(header.n_vars - header.n_public + 1)?;
+        // TODO how many?
+        let l_query = self.l_query(header.n_vars - header.n_public)?;
         let h_query = self.h_query(header.domain_size as usize)?;
 
         let vk = VerifyingKey::<Bn254> {
@@ -129,7 +130,10 @@ impl<'a> BinFile<'a> {
     }
 
     pub fn ic(&mut self, n_public: usize) -> IoResult<Vec<G1Affine>> {
-        self.g1_section(n_public, 3)
+        let ic_no_one = self.g1_section(n_public, 3)?;
+        let mut ic = vec![G1Affine::new(Fq::one(), Fq::one(), false)];
+        ic.extend_from_slice(&ic_no_one);
+        Ok(ic)
     }
 
     // Section 4 is the coefficients, we ignore it
@@ -467,6 +471,23 @@ mod tests {
         assert_eq!(header.n_public, 1);
         assert_eq!(header.domain_size, 2);
         assert_eq!(header.power, 2);
+    }
+
+    #[test]
+    fn deser_ic() {
+        let path = "./test-vectors/test.zkey";
+        let file = File::open(path).unwrap();
+        let map = unsafe {
+            MmapOptions::new()
+                .map(&file)
+                .expect("unable to create a memory map")
+        };
+        let mut reader = Cursor::new(map.as_ref());
+        let mut binfile = BinFile::new(&mut reader).unwrap();
+        let params = binfile.proving_key().unwrap();
+
+        let ic = params.vk.gamma_abc_g1;
+        // TODO: read the IC from Circom and see if it matches
     }
 
     #[test]
