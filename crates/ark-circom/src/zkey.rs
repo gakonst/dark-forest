@@ -466,7 +466,7 @@ mod tests {
         let header = binfile.groth_header().unwrap();
         assert_eq!(header.n_vars, 4);
         assert_eq!(header.n_public, 1);
-        assert_eq!(header.domain_size, 2);
+        assert_eq!(header.domain_size, 4);
         assert_eq!(header.power, 2);
     }
 
