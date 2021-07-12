@@ -38,7 +38,7 @@ use std::{
 use ark_bn254::{Bn254, Fq, Fq2, G1Affine, G2Affine};
 use ark_groth16::{ProvingKey, VerifyingKey};
 use ark_serialize::CanonicalSerialize;
-use num_traits::{One, Zero};
+use num_traits::Zero;
 
 #[derive(Clone, Debug)]
 pub struct Section {
@@ -68,7 +68,7 @@ impl<'a> BinFile<'a> {
             let section_id = reader.read_u32::<LittleEndian>()?;
             let section_length = reader.read_u64::<LittleEndian>()?;
 
-            let section = sections.entry(section_id).or_insert(Vec::new());
+            let section = sections.entry(section_id).or_insert_with(Vec::new);
             section.push(Section {
                 position: reader.position(),
                 size: section_length as usize,
