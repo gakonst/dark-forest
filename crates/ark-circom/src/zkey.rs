@@ -183,13 +183,20 @@ pub struct ZVerifyingKey {
 
 impl ZVerifyingKey {
     fn new<R: Read>(reader: &mut R) -> IoResult<Self> {
+        let alpha_g1 = deserialize_g1(reader)?;
+        let beta_g1 = deserialize_g1(reader)?;
+        let beta_g2 = deserialize_g2(reader)?;
+        let gamma_g2 = deserialize_g2(reader)?;
+        let delta_g1 = deserialize_g1(reader)?;
+        let delta_g2 = deserialize_g2(reader)?;
+
         Ok(Self {
-            alpha_g1: deserialize_g1(reader)?,
-            beta_g1: deserialize_g1(reader)?,
-            beta_g2: deserialize_g2(reader)?,
-            gamma_g2: deserialize_g2(reader)?,
-            delta_g1: deserialize_g1(reader)?,
-            delta_g2: deserialize_g2(reader)?,
+            alpha_g1,
+            beta_g1,
+            beta_g2,
+            gamma_g2,
+            delta_g1,
+            delta_g2,
         })
     }
 }
@@ -299,6 +306,7 @@ mod tests {
     use ark_bn254::{G1Projective, G2Projective};
     use memmap::*;
     use num_bigint::BigUint;
+    use serde_json::Value;
     use std::fs::File;
 
     use crate::{CircomBuilder, CircuitConfig};
@@ -695,6 +703,96 @@ mod tests {
             .unwrap(),
         ];
         assert_eq!(expected, params.h_query);
+    }
+
+    #[test]
+    fn deser_vk() {
+        let path = "./test-vectors/test.zkey";
+        let file = File::open(path).unwrap();
+        let map = unsafe {
+            MmapOptions::new()
+                .map(&file)
+                .expect("unable to create a memory map")
+        };
+        let mut reader = Cursor::new(map.as_ref());
+        let mut binfile = BinFile::new(&mut reader).unwrap();
+
+        let params = binfile.proving_key().unwrap();
+
+        let json = std::fs::read_to_string("./test-vectors/verification_key.json").unwrap();
+        let json: Value = serde_json::from_str(&json).unwrap();
+
+        assert_eq!(json_to_g1(&json, "vk_alpha_1"), params.vk.alpha_g1);
+        assert_eq!(json_to_g2(&json, "vk_beta_2"), params.vk.beta_g2);
+        assert_eq!(json_to_g2(&json, "vk_gamma_2"), params.vk.gamma_g2);
+        assert_eq!(json_to_g2(&json, "vk_delta_2"), params.vk.delta_g2);
+        assert_eq!(json_to_g1_vec(&json, "IC"), params.vk.gamma_abc_g1);
+    }
+
+    fn json_to_g1(json: &Value, key: &str) -> G1Affine {
+        let els: Vec<String> = json
+            .get(key)
+            .unwrap()
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|i| i.as_str().unwrap().to_string())
+            .collect();
+        G1Affine::from(G1Projective::new(
+            fq_from_str(&els[0]),
+            fq_from_str(&els[1]),
+            fq_from_str(&els[2]),
+        ))
+    }
+
+    fn json_to_g1_vec(json: &Value, key: &str) -> Vec<G1Affine> {
+        let els: Vec<Vec<String>> = json
+            .get(key)
+            .unwrap()
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|i| {
+                i.as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|x| x.as_str().unwrap().to_string())
+                    .collect::<Vec<String>>()
+            })
+            .collect();
+
+        els.iter()
+            .map(|coords| {
+                G1Affine::from(G1Projective::new(
+                    fq_from_str(&coords[0]),
+                    fq_from_str(&coords[1]),
+                    fq_from_str(&coords[2]),
+                ))
+            })
+            .collect()
+    }
+
+    fn json_to_g2(json: &Value, key: &str) -> G2Affine {
+        let els: Vec<Vec<String>> = json
+            .get(key)
+            .unwrap()
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|i| {
+                i.as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|x| x.as_str().unwrap().to_string())
+                    .collect::<Vec<String>>()
+            })
+            .collect();
+
+        let x = Fq2::new(fq_from_str(&els[0][0]), fq_from_str(&els[0][1]));
+        let y = Fq2::new(fq_from_str(&els[1][0]), fq_from_str(&els[1][1]));
+        let z = Fq2::new(fq_from_str(&els[2][0]), fq_from_str(&els[2][1]));
+        let res = G2Affine::from(G2Projective::new(x, y, z));
+        res
     }
 
     #[test]
