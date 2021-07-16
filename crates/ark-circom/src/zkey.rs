@@ -266,7 +266,8 @@ fn deserialize_field<R: Read>(reader: &mut R) -> IoResult<Fq> {
 fn deserialize_g1<R: Read>(reader: &mut R) -> IoResult<G1Affine> {
     let x = deserialize_field(reader)?;
     let y = deserialize_field(reader)?;
-    Ok(G1Affine::new(x, y, false))
+    let infinity = x.is_zero() && y.is_zero();
+    Ok(G1Affine::new(x, y, infinity))
 }
 
 fn deserialize_g2<R: Read>(reader: &mut R) -> IoResult<G2Affine> {
@@ -277,7 +278,8 @@ fn deserialize_g2<R: Read>(reader: &mut R) -> IoResult<G2Affine> {
     let c0 = deserialize_field(reader)?;
     let c1 = deserialize_field(reader)?;
     let f2 = Fq2::new(c0, c1);
-    Ok(G2Affine::new(f1, f2, false))
+    let infinity = f1.is_zero() && f2.is_zero();
+    Ok(G2Affine::new(f1, f2, infinity))
 }
 
 fn deserialize_g1_vec(buf: &[u8], n_vars: u32) -> IoResult<Vec<G1Affine>> {
