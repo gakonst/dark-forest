@@ -75,3 +75,5 @@ pub use circuit::{CircomBuilder, CircomCircuit, CircuitConfig};
 pub mod ethereum;
 
 pub mod zkey;
+
+pub mod circom_qap;

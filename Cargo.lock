@@ -93,6 +93,7 @@ dependencies = [
  "ark-ec",
  "ark-ff",
  "ark-groth16",
+ "ark-poly",
  "ark-r1cs-std",
  "ark-relations",
  "ark-serialize",
@@ -190,7 +191,7 @@ dependencies = [
 [[package]]
 name = "ark-groth16"
 version = "0.3.0"
-source = "git+https://github.com/gakonst/groth16?branch=feat/customizable-r1cs-to-qap#9518e517e55db895ec75c1d74f671645a58d9c96"
+source = "git+https://github.com/gakonst/groth16?branch=feat/customizable-r1cs-to-qap#dcd1dc75e56da4666b28473aed4ca349f2f226a1"
 dependencies = [
  "ark-crypto-primitives",
  "ark-ec",
