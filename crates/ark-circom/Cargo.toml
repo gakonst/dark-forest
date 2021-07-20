@@ -19,7 +19,7 @@ ark-ff = "0.3.0"
 ark-std = "0.3.0"
 ark-bn254 = "0.3.0"
 ark-r1cs-std = "0.3.1"
-ark-groth16 = "0.3.0"
+ark-groth16 = { git = "https://github.com/gakonst/groth16", version = "0.3.0", branch = "feat/customizable-r1cs-to-qap" }
 ark-relations = "0.3.0"
 
 hex = "0.4.3"

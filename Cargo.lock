@@ -190,8 +190,7 @@ dependencies = [
 [[package]]
 name = "ark-groth16"
 version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "38f8fff7468e947130b5caf9bdd27de8b913cf30e15104b4f0cd301726b3d897"
+source = "git+https://github.com/gakonst/groth16?branch=feat/customizable-r1cs-to-qap#9518e517e55db895ec75c1d74f671645a58d9c96"
 dependencies = [
  "ark-crypto-primitives",
  "ark-ec",
