@@ -14,7 +14,15 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-          components: rustfmt, clippy
+
+      - name: Install node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 10
+
+      - name: Install ganache
+        run: npm install -g ganache-cli
+
       - name: cargo test
         run: |
             cargo test
