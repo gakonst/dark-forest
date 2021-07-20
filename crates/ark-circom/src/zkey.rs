@@ -793,8 +793,7 @@ mod tests {
         let x = Fq2::new(fq_from_str(&els[0][0]), fq_from_str(&els[0][1]));
         let y = Fq2::new(fq_from_str(&els[1][0]), fq_from_str(&els[1][1]));
         let z = Fq2::new(fq_from_str(&els[2][0]), fq_from_str(&els[2][1]));
-        let res = G2Affine::from(G2Projective::new(x, y, z));
-        res
+        G2Affine::from(G2Projective::new(x, y, z))
     }
 
     #[test]

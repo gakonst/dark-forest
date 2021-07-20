@@ -13,6 +13,7 @@ use core::ops::Deref;
 pub struct R1CStoQAPCircom;
 
 impl QAPCalculator for R1CStoQAPCircom {
+    #[allow(clippy::type_complexity)]
     fn instance_map_with_evaluation<F: PrimeField, D: EvaluationDomain<F>>(
         cs: ConstraintSystemRef<F>,
         t: &F,
