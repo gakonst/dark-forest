@@ -104,7 +104,7 @@ impl QAPCalculator for R1CStoQAPCircom {
     ) -> Result<Vec<F>, SynthesisError> {
         // the usual H query has domain-1 powers. Z has domain powers. So HZ has 2*domain-1 powers.
         let mut scalars = cfg_into_iter!(0..2 * max_power + 1)
-            .map(|i| delta_inverse * &t.pow([i as u64]))
+            .map(|i| delta_inverse * t.pow([i as u64]))
             .collect::<Vec<_>>();
         let domain_size = scalars.len();
         let domain = D::new(domain_size).ok_or(SynthesisError::PolynomialDegreeTooLarge)?;
