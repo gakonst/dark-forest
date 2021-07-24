@@ -97,7 +97,7 @@ impl QAPCalculator for R1CStoQAPCircom {
     fn h_query_scalars<F: PrimeField, D: EvaluationDomain<F>>(
         max_power: usize,
         t: F,
-        zt: F,
+        _: F,
         delta_inverse: F,
     ) -> Result<Vec<F>, SynthesisError> {
         // the usual H query has domain-1 powers. Z has domain powers. So HZ has 2*domain-1 powers.
