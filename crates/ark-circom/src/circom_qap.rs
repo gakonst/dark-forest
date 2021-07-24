@@ -2,7 +2,7 @@ use ark_ff::PrimeField;
 use ark_groth16::r1cs_to_qap::{evaluate_constraint, QAPCalculator, R1CStoQAP};
 use ark_poly::EvaluationDomain;
 use ark_relations::r1cs::{ConstraintSystemRef, SynthesisError};
-use ark_std::{cfg_iter, cfg_iter_mut, vec};
+use ark_std::{cfg_into_iter, cfg_iter, cfg_iter_mut, vec};
 use core::ops::Deref;
 
 /// Implements the witness map used by snarkjs. The arkworks witness map calculates the
@@ -92,5 +92,22 @@ impl QAPCalculator for R1CStoQAPCircom {
             .for_each(|(ab_i, c_i)| *ab_i -= &c_i);
 
         Ok(ab.into_iter().skip(1).step_by(2).collect())
+    }
+
+    fn h_query_scalars<F: PrimeField, D: EvaluationDomain<F>>(
+        max_power: usize,
+        t: F,
+        _: F,
+        delta_inverse: F,
+    ) -> Result<Vec<F>, SynthesisError> {
+        // the usual H query has domain-1 powers. Z has domain powers. So HZ has 2*domain-1 powers.
+        let mut scalars = cfg_into_iter!(0..2 * max_power + 1)
+            .map(|i| delta_inverse * &t.pow([i as u64]))
+            .collect::<Vec<_>>();
+        let domain_size = scalars.len();
+        let domain = D::new(domain_size).ok_or(SynthesisError::PolynomialDegreeTooLarge)?;
+        // generate the lagrange coefficients
+        domain.ifft_in_place(&mut scalars);
+        Ok(cfg_into_iter!(scalars).skip(1).step_by(2).collect())
     }
 }
