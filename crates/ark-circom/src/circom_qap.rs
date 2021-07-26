@@ -2,7 +2,7 @@ use ark_ff::PrimeField;
 use ark_groth16::r1cs_to_qap::{evaluate_constraint, QAPCalculator, R1CStoQAP};
 use ark_poly::EvaluationDomain;
 use ark_relations::r1cs::{ConstraintSystemRef, SynthesisError};
-use ark_std::{cfg_iter, cfg_iter_mut, vec};
+use ark_std::{cfg_into_iter, cfg_iter, cfg_iter_mut, vec};
 use core::ops::Deref;
 
 /// Implements the witness map used by snarkjs. The arkworks witness map calculates the
@@ -62,17 +62,19 @@ impl QAPCalculator for R1CStoQAPCircom {
         domain.ifft_in_place(&mut a);
         domain.ifft_in_place(&mut b);
 
-        let domain_size_double = 2 * domain_size;
-        let domain_double =
-            D::new(domain_size_double).ok_or(SynthesisError::PolynomialDegreeTooLarge)?;
+        let root_of_unity = {
+            let domain_size_double = 2 * domain_size;
+            let domain_double =
+                D::new(domain_size_double).ok_or(SynthesisError::PolynomialDegreeTooLarge)?;
+            domain_double.element(1)
+        };
+        D::distribute_powers_and_mul_by_const(&mut a, root_of_unity, F::one());
+        D::distribute_powers_and_mul_by_const(&mut b, root_of_unity, F::one());
 
-        a.resize(domain_size_double, F::zero());
-        b.resize(domain_size_double, F::zero());
+        domain.fft_in_place(&mut a);
+        domain.fft_in_place(&mut b);
 
-        domain_double.fft_in_place(&mut a);
-        domain_double.fft_in_place(&mut b);
-
-        let mut ab = domain_double.mul_polynomials_in_evaluation_domain(&a, &b);
+        let mut ab = domain.mul_polynomials_in_evaluation_domain(&a, &b);
         drop(a);
         drop(b);
 
@@ -84,13 +86,30 @@ impl QAPCalculator for R1CStoQAPCircom {
             });
 
         domain.ifft_in_place(&mut c);
-        c.resize(domain_size_double, F::zero());
-        domain_double.fft_in_place(&mut c);
+        D::distribute_powers_and_mul_by_const(&mut c, root_of_unity, F::one());
+        domain.fft_in_place(&mut c);
 
         cfg_iter_mut!(ab)
             .zip(c)
             .for_each(|(ab_i, c_i)| *ab_i -= &c_i);
 
-        Ok(ab.into_iter().skip(1).step_by(2).collect())
+        Ok(ab)
+    }
+
+    fn h_query_scalars<F: PrimeField, D: EvaluationDomain<F>>(
+        max_power: usize,
+        t: F,
+        _: F,
+        delta_inverse: F,
+    ) -> Result<Vec<F>, SynthesisError> {
+        // the usual H query has domain-1 powers. Z has domain powers. So HZ has 2*domain-1 powers.
+        let mut scalars = cfg_into_iter!(0..2 * max_power + 1)
+            .map(|i| delta_inverse * t.pow([i as u64]))
+            .collect::<Vec<_>>();
+        let domain_size = scalars.len();
+        let domain = D::new(domain_size).ok_or(SynthesisError::PolynomialDegreeTooLarge)?;
+        // generate the lagrange coefficients
+        domain.ifft_in_place(&mut scalars);
+        Ok(cfg_into_iter!(scalars).skip(1).step_by(2).collect())
     }
 }
