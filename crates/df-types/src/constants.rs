@@ -12,12 +12,32 @@ pub const INITIAL_WORLD_RADIUS: u64 = 8000;
 // SNARK keys & Perlin parameters //
 ////////////////////////////////////
 
+#[cfg(not(test))]
 pub const PLANETHASH_KEY: u32 = 430;
+#[cfg(not(test))]
 pub const SPACETYPE_KEY: u64 = 431;
+#[cfg(not(test))]
 pub const BIOMEBASE_KEY: u64 = 432;
+#[cfg(not(test))]
+pub const PERLIN_LENGTH_SCALE: u64 = 16384; // must be a power of two no greater than 16384
+
+#[cfg(test)]
+pub const PLANETHASH_KEY: u32 = 1;
+#[cfg(test)]
+pub const SPACETYPE_KEY: u64 = 2;
+#[cfg(test)]
+pub const BIOMEBASE_KEY: u64 = 3;
+#[cfg(test)]
+pub const PERLIN_LENGTH_SCALE: u64 = 8192; // must be a power of two no greater than 8192
+
+#[cfg(not(test))]
+pub const PLANET_RARITY: u32 = 16384;
+
+#[cfg(test)]
+pub const PLANET_RARITY: u32 = 1; // u32::MAX;
+
 pub const PERLIN_MIRROR_X: bool = false;
 pub const PERLIN_MIRROR_Y: bool = false;
-pub const PERLIN_LENGTH_SCALE: u64 = 16384; // must be a power of two no greater than 16384
 
 ////////////////////////
 // Game configuration //
@@ -32,7 +52,6 @@ pub const INIT_PERLIN_MIN: u64 = 14;
 pub const INIT_PERLIN_MAX: u64 = 15;
 pub const BIOME_THRESHOLD_1: u64 = 15;
 pub const BIOME_THRESHOLD_2: u64 = 17;
-pub const PLANET_RARITY: u32 = 16384;
 pub const PHOTOID_ACTIVATION_DELAY: u64 = 14400; // seconds
 pub const LOCATION_REVEAL_COOLDOWN: u64 = 86400; // seconds
 
