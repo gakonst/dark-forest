@@ -145,6 +145,11 @@
           },
           {
             "internalType": "uint256",
+            "name": "SPAWN_RIM_AREA",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
             "name": "BIOME_THRESHOLD_1",
             "type": "uint256"
           },
@@ -461,6 +466,19 @@
         "internalType": "uint256[]",
         "name": "",
         "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getRevealCooldown",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -1042,16 +1060,6 @@
             "internalType": "uint256",
             "name": "lastRevealTimestamp",
             "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "withdrawnSilver",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "totalArtifactPoints",
-            "type": "uint256"
           }
         ],
         "internalType": "struct DarkForestTypes.Player",
@@ -1243,6 +1251,11 @@
           {
             "internalType": "uint256",
             "name": "INIT_PERLIN_MAX",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "SPAWN_RIM_AREA",
             "type": "uint256"
           },
           {
