@@ -8,7 +8,26 @@ use crate::{
 
 mod spiral;
 pub use spiral::SpiralExplorer;
+
+mod directional;
+pub use directional::DirectionalExplorer;
+
 use std::convert::TryFrom;
+
+pub enum Direction {
+    Left,
+    Right,
+    Up,
+    Down,
+}
+
+pub fn explore_directional(
+    center: Coords,
+    chunk_size: u16,
+    direction: Direction,
+) -> impl Iterator<Item = PlanetLocation> {
+    explore(DirectionalExplorer::new(center, chunk_size, direction))
+}
 
 pub fn explore_spiral(center: Coords, chunk_size: u16) -> impl Iterator<Item = PlanetLocation> {
     explore(SpiralExplorer::new(center, chunk_size))
@@ -18,10 +37,7 @@ pub fn explore_spiral(center: Coords, chunk_size: u16) -> impl Iterator<Item = P
 pub fn explore<I: IntoIterator<Item = ChunkFootprint>>(
     explorer: I,
 ) -> impl Iterator<Item = PlanetLocation> {
-    explorer
-        .into_iter()
-        .map(reveal_chunk)
-        .flatten()
+    explorer.into_iter().map(reveal_chunk).flatten()
 }
 
 fn reveal_chunk(chunk: ChunkFootprint) -> impl Iterator<Item = PlanetLocation> {

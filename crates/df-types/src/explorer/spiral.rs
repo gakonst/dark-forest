@@ -10,8 +10,6 @@ pub struct SpiralExplorer {
 
 impl SpiralExplorer {
     pub fn new(center: Coords, chunk_side_length: u16) -> Self {
-        //floor by default?
-
         let length = i64::from(chunk_side_length);
 
         let bottom_left_x = (center.x / length) * length;
