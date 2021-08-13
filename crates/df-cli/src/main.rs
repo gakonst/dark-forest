@@ -125,7 +125,7 @@ async fn main() -> Result<()> {
                 Err(err) => {
                     let err = err.to_string();
                     let err = err.split("Reverted 0x").collect::<Vec<&str>>()[1];
-                    let err = err.split(",").collect::<Vec<&str>>()[0];
+                    let err = err.split(',').collect::<Vec<&str>>()[0];
                     let err = hex::decode(err).unwrap();
                     let err = std::str::from_utf8(&err).unwrap();
                     println!("Reverted with: {}", err);
