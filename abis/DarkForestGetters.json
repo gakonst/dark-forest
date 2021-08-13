@@ -1100,16 +1100,6 @@
             "internalType": "uint256",
             "name": "lastRevealTimestamp",
             "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "withdrawnSilver",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "totalArtifactPoints",
-            "type": "uint256"
           }
         ],
         "internalType": "struct DarkForestTypes.Player[]",

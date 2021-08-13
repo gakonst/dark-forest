@@ -691,6 +691,11 @@
           },
           {
             "internalType": "uint256",
+            "name": "SPAWN_RIM_AREA",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
             "name": "BIOME_THRESHOLD_1",
             "type": "uint256"
           },
@@ -1181,6 +1186,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "getRevealCooldown",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -1272,6 +1290,171 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_adminAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "address payable",
+        "name": "_whitelistAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "address payable",
+        "name": "_tokensAddress",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bool",
+            "name": "ADMIN_CAN_ADD_PLANETS",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "WORLD_RADIUS_LOCKED",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "LOCATION_REVEAL_COOLDOWN",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "TOKEN_MINT_END_TIMESTAMP",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "TARGET4_RADIUS",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "INITIAL_WORLD_RADIUS",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "DISABLE_ZK_CHECKS",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "PLANETHASH_KEY",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "SPACETYPE_KEY",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "BIOMEBASE_KEY",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "PERLIN_MIRROR_X",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "PERLIN_MIRROR_Y",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "PERLIN_LENGTH_SCALE",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "MAX_NATURAL_PLANET_LEVEL",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "TIME_FACTOR_HUNDREDTHS",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "PERLIN_THRESHOLD_1",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "PERLIN_THRESHOLD_2",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "PERLIN_THRESHOLD_3",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "INIT_PERLIN_MIN",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "INIT_PERLIN_MAX",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "SPAWN_RIM_AREA",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "BIOME_THRESHOLD_1",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "BIOME_THRESHOLD_2",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "PLANET_RARITY",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint8[5][10][4]",
+            "name": "PLANET_TYPE_WEIGHTS",
+            "type": "uint8[5][10][4]"
+          },
+          {
+            "internalType": "uint256[6]",
+            "name": "ARTIFACT_POINT_VALUES",
+            "type": "uint256[6]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "PHOTOID_ACTIVATION_DELAY",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct DarkForestTypes.DFInitArgs",
+        "name": "initArgs",
+        "type": "tuple"
+      }
+    ],
+    "name": "initialize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -1831,16 +2014,6 @@
             "internalType": "uint256",
             "name": "lastRevealTimestamp",
             "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "withdrawnSilver",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "totalArtifactPoints",
-            "type": "uint256"
           }
         ],
         "internalType": "struct DarkForestTypes.Player",
@@ -2092,6 +2265,11 @@
           {
             "internalType": "uint256",
             "name": "INIT_PERLIN_MAX",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "SPAWN_RIM_AREA",
             "type": "uint256"
           },
           {

@@ -51,6 +51,16 @@ pub struct PlanetLocation {
     pub biomebase: u64,
 }
 
+impl PlanetLocation {
+    /// $$ \sqrt{{x1-x2}^2 + {y1-y2}^2} $$
+    pub fn max_distance(&self, other: PlanetLocation) -> U256 {
+        (((self.coords.x - other.coords.x).pow(2) as f64
+            + (self.coords.y - other.coords.y).pow(2) as f64)
+            .sqrt() as u64 + 1)
+            .into()
+    }
+}
+
 impl AsRef<U256> for PlanetLocation {
     fn as_ref(&self) -> &U256 {
         self.hash.as_ref()

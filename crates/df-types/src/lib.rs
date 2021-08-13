@@ -13,3 +13,5 @@ pub mod map;
 pub use map::Map;
 
 pub mod planet;
+
+pub mod explorer;

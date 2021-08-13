@@ -18,19 +18,19 @@ impl Map {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, PartialOrd)]
 #[serde(rename_all = "camelCase")]
 pub struct Chunk {
-    chunk_footprint: ChunkFootprint,
-    perlin: f64,
-    planet_locations: Vec<PlanetLocation>,
+    pub chunk_footprint: ChunkFootprint,
+    pub perlin: f64,
+    pub planet_locations: Vec<PlanetLocation>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, PartialOrd)]
 #[serde(rename_all = "camelCase")]
 pub struct ChunkFootprint {
-    bottom_left: Coords,
-    side_length: u64,
+    pub bottom_left: Coords,
+    pub side_length: u64,
 }
 
 #[cfg(test)]
