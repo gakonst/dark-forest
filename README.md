@@ -15,6 +15,21 @@ cargo doc --open
 cargo run
 ```
 
+## Move CLI Usage
+
+In order to send forces to another planet, you can use the CLI command below, which
+will move 100 units (internally coded as 100000, because DF types are all x100 on-chain to avoid
+rounding errors) to the target planet. Coordinates are given as a comma separated list of
+signed integers.
+
+```
+cargo r move --from=-100,100 --to=-120,120 \
+    --wasm ./crates/df-engine/round3-data/move.wasm \
+    --r1cs ./crates/df-engine/round3-data/move.r1cs \
+    --zkey ./crates/df-engine/round3-data/move.zkey \
+    --private-key <your private key without a 0x>
+```
+
 ## Roadmap
 
 * [ ] Dark Forest Types

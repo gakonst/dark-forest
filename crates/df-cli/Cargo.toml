@@ -11,3 +11,4 @@ dark-forest = { path = "../dark-forest" }
 ethers = { git = "https://github.com/gakonst/ethers-rs" }
 tokio = { version = "1.7.1", features = ["macros"] }
 serde_json = "1.0.64"
+hex = "0.4.3"

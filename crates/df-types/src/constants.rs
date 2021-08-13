@@ -12,29 +12,11 @@ pub const INITIAL_WORLD_RADIUS: u64 = 8000;
 // SNARK keys & Perlin parameters //
 ////////////////////////////////////
 
-#[cfg(not(test))]
-pub const PLANETHASH_KEY: u32 = 430;
-#[cfg(not(test))]
-pub const SPACETYPE_KEY: u64 = 431;
-#[cfg(not(test))]
-pub const BIOMEBASE_KEY: u64 = 432;
-#[cfg(not(test))]
+pub const PLANETHASH_KEY: u32 = 1729;
+pub const SPACETYPE_KEY: u64 = 1730;
+pub const BIOMEBASE_KEY: u64 = 1731;
 pub const PERLIN_LENGTH_SCALE: u64 = 16384; // must be a power of two no greater than 16384
-
-#[cfg(test)]
-pub const PLANETHASH_KEY: u32 = 1;
-#[cfg(test)]
-pub const SPACETYPE_KEY: u64 = 2;
-#[cfg(test)]
-pub const BIOMEBASE_KEY: u64 = 3;
-#[cfg(test)]
-pub const PERLIN_LENGTH_SCALE: u64 = 8192; // must be a power of two no greater than 8192
-
-#[cfg(not(test))]
 pub const PLANET_RARITY: u32 = 16384;
-
-#[cfg(test)]
-pub const PLANET_RARITY: u32 = 1; // u32::MAX;
 
 pub const PERLIN_MIRROR_X: bool = false;
 pub const PERLIN_MIRROR_Y: bool = false;
