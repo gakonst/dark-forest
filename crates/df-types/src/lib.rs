@@ -5,7 +5,7 @@
 //! universe, conquering planets and growing a cosmic empire.
 //!
 //! Learn more at the [blog](https://blog.zkga.me)
-mod utils;
+pub mod utils;
 
 pub mod constants;
 

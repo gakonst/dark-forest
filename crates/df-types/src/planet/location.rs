@@ -4,7 +4,7 @@ use super::id::{deserialize_planet_id, PlanetId};
 
 use darkforest_mimc::mimc_hash;
 use derive_more::AsRef;
-use ethers::types::U256;
+use ethers::{core::rand::Rng, types::U256};
 use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 use thiserror::Error;
@@ -17,6 +17,63 @@ pub struct Coords {
     pub x: i64,
     /// Y coordinate
     pub y: i64,
+}
+
+#[derive(Debug, Error)]
+#[error("missing value {0}")]
+pub struct CoordsError(String);
+
+// read them as comma denominated
+use std::str::FromStr;
+impl FromStr for Coords {
+    type Err = CoordsError;
+
+    fn from_str(src: &str) -> Result<Coords, Self::Err> {
+        let mut coords = src.split(',').map(|x| i64::from_str(x)).flatten();
+        let x = coords.next().ok_or_else(|| CoordsError("x".to_string()))?;
+        let y = coords.next().ok_or_else(|| CoordsError("y".to_string()))?;
+        Ok(Coords { x, y })
+    }
+}
+
+impl Coords {
+    /// $$ \sqrt{{x1-x2}^2 + {y1-y2}^2} $$
+    pub fn max_distance(&self, other: &Self) -> u64 {
+        ((self.x - other.x).pow(2) as f64 + (self.y - other.y).pow(2) as f64).sqrt() as u64 + 1
+    }
+
+    /// $$ \sqrt{{x}^2 + {y}^2} $$
+    pub fn max_radius(&self) -> u64 {
+        ((self.x.pow(2) + self.y.pow(2)) as f64).sqrt() as u64 + 1
+    }
+
+    // in the world radius
+    pub fn in_circle(&self, r: u64) -> bool {
+        self.max_radius() < r as u64 + 1
+    }
+
+    // in the world radius
+    pub fn outside_circle(&self, r: u64) -> bool {
+        self.max_radius() > r as u64 + 1
+    }
+
+    pub fn in_ring(&self, inner: u64, outer: u64) -> bool {
+        self.outside_circle(inner) && self.in_circle(outer)
+    }
+
+    /// Given an RNG distribution and the Radius of 2 circles, it produces a random
+    /// coordinates pair within the ring formed by the 2 circles
+    pub fn random_in_ring<R: Rng>(rng: &mut R, inner: u64, outer: u64) -> Self {
+        use ethers::core::rand::distributions::{Distribution, Uniform};
+        // get a random angle in the circle
+        let angle = Uniform::from(0.0..2.0 * std::f64::consts::PI).sample(rng);
+        // get a random radius between the inner and outer ring
+        let distance = Uniform::from(inner..outer).sample(rng) as f64;
+
+        let x = (distance * angle.cos()) as i64;
+        let y = (distance * angle.sin()) as i64;
+        (x, y).into()
+    }
 }
 
 impl From<(i64, i64)> for Coords {
@@ -51,13 +108,34 @@ pub struct PlanetLocation {
     pub biomebase: u64,
 }
 
+impl TryFrom<Coords> for PlanetLocation {
+    type Error = NoPlanet;
+    fn try_from(coords: Coords) -> Result<Self, NoPlanet> {
+        let hash = PlanetId::try_from(&coords)?;
+        Ok(Self {
+            coords,
+            hash,
+            // TODO: Figure out how to calculate these!
+            perlin: 19,
+            biomebase: 0,
+        })
+    }
+}
+
 impl PlanetLocation {
+    pub fn random_in_ring<R: Rng>(rng: &mut R, inner: u64, outer: u64) -> Result<Self, NoPlanet> {
+        let coords = Coords::random_in_ring(rng, inner, outer);
+        Self::try_from(coords)
+    }
+
     /// $$ \sqrt{{x1-x2}^2 + {y1-y2}^2} $$
-    pub fn max_distance(&self, other: PlanetLocation) -> U256 {
-        (((self.coords.x - other.coords.x).pow(2) as f64
-            + (self.coords.y - other.coords.y).pow(2) as f64)
-            .sqrt() as u64 + 1)
-            .into()
+    pub fn max_distance(&self, other: &PlanetLocation) -> u64 {
+        self.coords.max_distance(&other.coords)
+    }
+
+    /// $$ \sqrt{{x}^2 + {y}^2} $$
+    pub fn max_radius(&self) -> u64 {
+        self.coords.max_radius()
     }
 }
 
@@ -78,7 +156,6 @@ impl TryFrom<&Coords> for PlanetId {
 
     fn try_from(coords: &Coords) -> Result<PlanetId, Self::Error> {
         let id = mimc_hash(coords.x, coords.y, constants::PLANETHASH_KEY);
-
         if &id > &PLANET_BOUNDS {
             return Err(NoPlanet(coords.clone()));
         }

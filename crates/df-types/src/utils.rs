@@ -16,9 +16,7 @@ pub fn byte(buf: U256, i: usize) -> u8 {
 
 pub static PLANET_BOUNDS: Lazy<U512> = Lazy::new(|| threshold(constants::PLANET_RARITY));
 
-#[cfg(test)]
 use std::path::PathBuf;
-#[cfg(test)]
 pub fn root_path(p: &str) -> PathBuf {
     let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     path.push(p);
