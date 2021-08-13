@@ -59,6 +59,15 @@ struct MoveOpts {
 
     #[structopt(short, long)]
     zkey: PathBuf,
+
+    #[structopt(short, long)]
+    population: u64,
+
+    #[structopt(short, long)]
+    silver: u64,
+
+    #[structopt(short, long)]
+    artifact_id: Option<u64>,
 }
 
 mod map;
@@ -90,9 +99,9 @@ async fn main() -> Result<()> {
             let (proof, _inputs) = prover.prove(&from, &to)?;
 
             let args = MoveArgs {
-                population: 100_000.into(),
-                silver: 0.into(),
-                moved_artifact: None,
+                population: opts.population.into(),
+                silver: opts.silver.into(),
+                moved_artifact: opts.artifact_id.map(ethers::types::U256::from),
             };
 
             let planet_from = contracts.planet(from.clone()).await?;
@@ -114,9 +123,12 @@ async fn main() -> Result<()> {
             let pending_tx = match call.send().await {
                 Ok(pending) => pending,
                 Err(err) => {
-                    dbg!(&err);
                     let err = err.to_string();
-                    dbg!(hex::decode(&err[10..]).unwrap());
+                    let err = err.split("Reverted 0x").collect::<Vec<&str>>()[1];
+                    let err = err.split(",").collect::<Vec<&str>>()[0];
+                    let err = hex::decode(err).unwrap();
+                    let err = std::str::from_utf8(&err).unwrap();
+                    println!("Reverted with: {}", err);
                     return Ok(());
                 }
             };
@@ -126,7 +138,7 @@ async fn main() -> Result<()> {
                 *pending_tx
             );
 
-            let confirmed = pending_tx.confirmations(1).await?;
+            let confirmed = pending_tx.await?;
             println!("Confirmed {:?}", confirmed);
 
             let planet_from = contracts.planet(from.clone()).await?;
