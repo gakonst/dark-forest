@@ -65,10 +65,11 @@ mod tests {
     use super::*;
 
     #[test]
+    #[ignore]
     fn can_find_planet() {
         let center = Coords { x: 0, y: 0 };
         let iter = explore_spiral(center, 1024 as u16);
-        let items = iter.take(3).collect::<Vec<_>>();
+        let items = iter.take(1).collect::<Vec<_>>();
         dbg!(&items);
     }
 }
