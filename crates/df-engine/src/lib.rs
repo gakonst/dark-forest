@@ -1,148 +1,88 @@
-//! Smart Contracts APIs
-use std::{convert::TryFrom, sync::Arc};
+pub mod prover;
+pub use prover::init::InitProver;
+pub use prover::mover::MoveProver;
+pub use prover::CircuitProver;
+pub use prover::Prover;
 
-use ethers::{
-    contract::ContractError,
-    providers::{Http, Middleware, Provider},
-    types::{TxHash, U256},
+pub mod contracts;
+pub use contracts::Contracts;
+
+use ethers::types::{Address, TxHash};
+use reqwest::{Client, Response};
+
+const DF_REGISTER_API: &str = "https://api.zkga.me/whitelist/register";
+
+use df_types::planet::Coords;
+
+// pls dont attack
+pub const HOME: Coords = Coords {
+    x: -305389,
+    y: 188332,
 };
 
-use df_contracts::{
-    bindings::{DarkForestCore, DarkForestGetters},
-    config::{Config, Network},
+pub const TARGET: Coords = Coords {
+    x: -305468,
+    y: 188340,
 };
-use df_types::planet::{PlanetId, PlanetInfo, PlanetLocation, UpgradeBranch};
 
-#[derive(Clone, Debug)]
-/// Object containing all the necessary smart contracts
-pub struct Contracts<M: Middleware> {
-    pub core: DarkForestCore<M>,
-    pub getters: DarkForestGetters<M>,
-}
+/// Registers your Address to the provided Whitelist Key by making a POST request
+/// to the Dark Forest API. Returns the submitted transaction hash which can be used
+/// to track when registration is done.
+pub async fn register(key: &str, address: Address) -> Result<TxHash, reqwest::Error> {
+    let client = Client::new();
+    let res: Response = client
+        .post(DF_REGISTER_API)
+        .json(&serde_json::json!({
+            "key": key,
+            "address": address,
+        }))
+        .send()
+        .await?;
 
-impl Contracts<Provider<Http>> {
-    pub fn new_xdai_readonly() -> Self {
-        let provider = Provider::try_from("https://dai.poa.network").unwrap();
-        Self::new(Arc::new(provider), Network::Xdai)
+    #[derive(serde::Deserialize)]
+    struct RegisterResponse {
+        #[serde(rename = "txHash")]
+        tx_hash: TxHash,
     }
-}
+    let data: RegisterResponse = res.json().await?;
 
-impl<M: Middleware> Contracts<M> {
-    /// Creates a new contract object given an Ethers Middleware and a Network
-    pub fn new(provider: Arc<M>, network: Network) -> Self {
-        let cfg = match network {
-            Network::Xdai => Config::xdai(),
-        };
-
-        Self {
-            core: DarkForestCore::new(cfg.core, provider.clone()),
-            getters: DarkForestGetters::new(cfg.getters, provider),
-        }
-    }
-
-    /// Given a planet's ID, return the planet w/ any non-initialized values set to its defaults
-    pub async fn planet(&self, loc: PlanetLocation) -> Result<PlanetInfo, ContractError<M>> {
-        Ok(self
-            .planets_with_defaults([loc])
-            .await?
-            .next()
-            .expect("planet not found"))
-    }
-
-    /// Given a planet's ID, return the planet w/ any non-initialized values set to its defaults
-    pub async fn planet_initialized(&self, id: PlanetId) -> Result<PlanetInfo, ContractError<M>> {
-        let planets = self
-            .getters
-            .bulk_get_planets_data_by_ids(vec![*id.as_ref()])
-            .call()
-            .await?;
-        let planet = PlanetInfo::from(planets[0]);
-        Ok(planet)
-    }
-
-    /// Given a planet's ID and upgrade branch, upgrade that planet
-    pub async fn upgrade_planet<T: AsRef<U256>>(
-        &self,
-        id: T,
-        branch: UpgradeBranch,
-    ) -> Result<TxHash, ContractError<M>> {
-        // TODO: Can we improve ethers-rs APIs to be able to return a Pending Transaction
-        // instead of derefing down to just the tx hash?
-        let call = self.core.upgrade_planet(*id.as_ref(), branch.into());
-        let pending_tx = call.send().await?;
-        Ok(*pending_tx)
-    }
-
-    /// Given a planet's ID, it prospects the planet (prepares it for finding an artifact)
-    pub async fn prospect_planet<T: AsRef<U256>>(&self, id: T) -> Result<TxHash, ContractError<M>> {
-        let call = self.core.prospect_planet(*id.as_ref());
-        let pending_tx = call.send().await?;
-        Ok(*pending_tx)
-    }
-
-    /// Given an iterator of planet IDs, return the planet infos
-    pub async fn planets<I, T>(
-        &self,
-        ids: I,
-    ) -> Result<impl Iterator<Item = PlanetInfo>, ContractError<M>>
-    where
-        T: AsRef<U256>,
-        I: IntoIterator<Item = T>,
-    {
-        let ids: Vec<U256> = ids.into_iter().map(|id| *id.as_ref()).collect();
-
-        // get the planets from the contract in a bulk
-        let planets = self
-            .getters
-            .bulk_get_planets_data_by_ids(ids)
-            .call()
-            .await?;
-
-        // convert them to our data type
-        let planets = planets.into_iter().map(|planet| PlanetInfo {
-            planet: planet.0.into(),
-            info: planet.1.into(),
-            coords: planet.2.into(),
-        });
-
-        Ok(planets)
-    }
-
-    /// Given an iterator of planet locations, return the planet infos w/ any non-initialized
-    /// planets set to their default values
-    pub async fn planets_with_defaults<I>(
-        &self,
-        locs: I,
-    ) -> Result<impl Iterator<Item = PlanetInfo>, ContractError<M>>
-    where
-        I: IntoIterator<Item = PlanetLocation> + Clone,
-    {
-        let planets_iter = self.planets(locs.clone()).await?;
-
-        let planets = planets_iter.zip(locs).map(|(planet, loc)| {
-            if !planet.info.initialized {
-                PlanetInfo::from(&loc)
-            } else {
-                planet
-            }
-        });
-
-        Ok(planets)
-    }
+    Ok(data.tx_hash)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use df_types::planet::{Coords, PlanetId, PlanetLocation};
+    use std::convert::TryFrom;
+    use std::path::PathBuf;
 
-    #[tokio::test]
-    async fn get_planet() {
-        let api = Contracts::new_xdai_readonly();
-        let loc = "000094c6002fd43d80ce2853a8e77a3d00488b0694aae4e4fa0ddc534e5e7531"
-            .parse::<U256>()
-            .unwrap();
-        let loc = PlanetId::from(loc);
-        let planet = api.planet_initialized(loc).await.unwrap();
-        assert_eq!(planet.info.upgrade_state_1.as_u64(), 3);
+    pub fn from_planet() -> PlanetLocation {
+        let coords = Coords::from(HOME);
+        let hash = PlanetId::try_from(&coords).unwrap();
+        PlanetLocation {
+            coords,
+            hash,
+            // ADD PERLIN GENERATION FUNCTION
+            perlin: 19,
+            biomebase: 16,
+        }
+    }
+
+    pub fn to_planet() -> PlanetLocation {
+        let coords = Coords::from(TARGET);
+        let hash = PlanetId::try_from(&coords).unwrap();
+        let to = PlanetLocation {
+            coords,
+            hash,
+            perlin: 19,
+            biomebase: 16,
+        };
+        to
+    }
+
+    pub fn root_path(p: &str) -> PathBuf {
+        let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        path.push(p);
+        path
     }
 }
