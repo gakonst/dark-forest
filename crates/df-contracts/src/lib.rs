@@ -10,8 +10,11 @@ pub mod bindings {
     use ethers::contract::abigen;
 
     macro_rules! multi_abigen {
-       ($($contract:ident, $path:literal $(, methods
-            { $($method_name:ident ($($arg:ty),*) as  $alias:ident;)* }  )? );* $(;)?) => {
+       ($($contract:ident, $path:literal
+            $(, methods { $($method_name:ident ($($arg:ty),*) as  $alias:ident;)* } )?
+            $(, event_derives ($($derives:path),*))?
+       );* $(;)?
+       ) => {
         $(
               abigen!(
                   $contract,
@@ -22,6 +25,9 @@ pub mod bindings {
                                 $method_name($($arg),*) as $alias;
                               )*
                       }
+                  )?
+                  $(,
+                    event_derives ($($derives,)*),
                   )?
               );
         )*
