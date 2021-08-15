@@ -81,7 +81,7 @@ mod tests {
     #[test]
     fn sixteen_iter() {
         let center = Coords { x: 0, y: 0 };
-        let chunk_side_length = 16 as u64;
+        let chunk_side_length = 16_u64;
         let mut explorer = SpiralExplorer::new(center, chunk_side_length as u16);
 
         assert_eq!(
@@ -143,7 +143,7 @@ mod tests {
     #[test]
     fn thirtytwo_iter() {
         let center = Coords { x: 0, y: 0 };
-        let chunk_side_length = 32 as u64;
+        let chunk_side_length = 32_u64;
         let mut explorer = SpiralExplorer::new(center, chunk_side_length as u16);
 
         assert_eq!(

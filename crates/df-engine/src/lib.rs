@@ -57,7 +57,7 @@ mod tests {
     use std::path::PathBuf;
 
     pub fn from_planet() -> PlanetLocation {
-        let coords = Coords::from(HOME);
+        let coords = HOME;
         let hash = PlanetId::try_from(&coords).unwrap();
         PlanetLocation {
             coords,
@@ -69,15 +69,15 @@ mod tests {
     }
 
     pub fn to_planet() -> PlanetLocation {
-        let coords = Coords::from(TARGET);
+        let coords = TARGET;
         let hash = PlanetId::try_from(&coords).unwrap();
-        let to = PlanetLocation {
+        
+        PlanetLocation {
             coords,
             hash,
             perlin: 19,
             biomebase: 16,
-        };
-        to
+        }
     }
 
     pub fn root_path(p: &str) -> PathBuf {
