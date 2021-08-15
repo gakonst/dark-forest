@@ -217,12 +217,10 @@ fn to_eth_type<P: Into<Proof>>(proof: P) -> Abc {
 mod tests {
     use super::*;
     use crate::{
-        prover::{init::InitProver, mover::MoveProver, tests::circuit_prover},
-        tests::{from_planet, root_path, to_planet},
-        HOME,
+        prover::{mover::MoveProver, tests::circuit_prover},
+        tests::{from_planet, to_planet},
     };
-    use ark_std::rand::thread_rng;
-    use df_contracts::addr;
+
     use ethers::prelude::{LocalWallet, SignerMiddleware};
 
     #[tokio::test]

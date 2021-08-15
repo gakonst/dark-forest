@@ -347,7 +347,7 @@ mod tests {
                 ..Default::default()
             },
         )] {
-            let planet = Planet::new(&loc);
+            let planet = Planet::new(loc);
             assert_eq!(&planet, expected);
         }
     }

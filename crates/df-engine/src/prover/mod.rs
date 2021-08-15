@@ -103,12 +103,11 @@ pub(super) mod tests {
             ark_circom::read_zkey(&mut reader).unwrap()
         } else {
             generate_random_parameters_with_reduction::<Bn254, _, _, CircomReduction>(
-                circom.clone(),
-                &mut rng,
+                circom, &mut rng,
             )
             .unwrap()
         };
-        T::from(CircuitProver::new(builder.clone(), params.clone()))
+        T::from(CircuitProver::new(builder, params))
     }
 
     fn check_prover(zkey: Option<&str>) {

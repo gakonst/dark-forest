@@ -31,7 +31,7 @@ struct MapOpts {
 
 use std::error::Error;
 fn parse_coords(s: &str) -> Result<Coords, Box<dyn Error>> {
-    let mut s = s.split(',').map(|x| i64::from_str(x)).flatten();
+    let mut s = s.split(',').map(i64::from_str).flatten();
     let x = s.next().unwrap();
     let y = s.next().unwrap();
     Ok(Coords { x, y })

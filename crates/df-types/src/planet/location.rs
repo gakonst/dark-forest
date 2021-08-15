@@ -29,7 +29,7 @@ impl FromStr for Coords {
     type Err = CoordsError;
 
     fn from_str(src: &str) -> Result<Coords, Self::Err> {
-        let mut coords = src.split(',').map(|x| i64::from_str(x)).flatten();
+        let mut coords = src.split(',').map(i64::from_str).flatten();
         let x = coords.next().ok_or_else(|| CoordsError("x".to_string()))?;
         let y = coords.next().ok_or_else(|| CoordsError("y".to_string()))?;
         Ok(Coords { x, y })
