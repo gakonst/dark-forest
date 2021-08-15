@@ -3,3 +3,6 @@
 members = [
     "crates/*",
 ]
+
+[patch."https://github.com/gakonst/ethers-rs"]
+ethers = { git = "https://github.com/mattsse/ethers-rs.git", branch = "generate-tuple-types" }
