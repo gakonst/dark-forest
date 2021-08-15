@@ -220,8 +220,7 @@ mod tests {
         prover::{mover::MoveProver, tests::circuit_prover},
         tests::{from_planet, to_planet},
     };
-    
-    
+
     use ethers::prelude::{LocalWallet, SignerMiddleware};
 
     #[tokio::test]

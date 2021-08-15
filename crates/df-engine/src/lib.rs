@@ -71,7 +71,7 @@ mod tests {
     pub fn to_planet() -> PlanetLocation {
         let coords = TARGET;
         let hash = PlanetId::try_from(&coords).unwrap();
-        
+
         PlanetLocation {
             coords,
             hash,

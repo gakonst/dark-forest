@@ -103,8 +103,7 @@ pub(super) mod tests {
             ark_circom::read_zkey(&mut reader).unwrap()
         } else {
             generate_random_parameters_with_reduction::<Bn254, _, _, CircomReduction>(
-                circom,
-                &mut rng,
+                circom, &mut rng,
             )
             .unwrap()
         };
