@@ -10,29 +10,29 @@ pub mod bindings {
     use ethers::contract::abigen;
 
     macro_rules! multi_abigen {
-       ($($contract:ident, $path:literal
-            $(, methods { $($method_name:ident ($($arg:ty),*) as  $alias:ident;)* } )?
-            $(, event_derives ($($derives:path),*))?
-       );* $(;)?
-       ) => {
-        $(
-              abigen!(
-                  $contract,
-                  $path
-                  $(,
-                      methods {
-                              $(
-                                $method_name($($arg),*) as $alias;
-                              )*
-                      }
-                  )?
-                  $(,
-                    event_derives ($($derives,)*),
-                  )?
-              );
-        )*
-    };
-}
+           ($($contract:ident, $path:literal
+                $(, methods { $($method_name:ident ($($arg:ty),*) as  $alias:ident;)* } )?
+                $(, event_derives ($($derives:path),*))?
+           );* $(;)?
+           ) => {
+            $(
+                  abigen!(
+                      $contract,
+                      $path
+                      $(,
+                          methods {
+                                  $(
+                                    $method_name($($arg),*) as $alias;
+                                  )*
+                          }
+                      )?
+                      $(,
+                        event_derives ($($derives,)*),
+                      )?
+                  );
+            )*
+        };
+    }
 
     multi_abigen! {
         DarkForestCore, "./abis/DarkForestCore.json";
