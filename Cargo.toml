@@ -1,9 +1,5 @@
 [workspace]
 
 members = [
-    "./crates/df-types",
-    "./crates/df-contracts",
-    "./crates/df-engine",
-    "./crates/dark-forest",
-    "./crates/df-cli",
+    "crates/*",
 ]
